@@ -1,0 +1,10 @@
+detail,building type,total floor area,ASHRAE climate zone,CA climate zone,grid region,hr_wwhp
+units,-,m2,-,-,-,
+,,,,,,
+bldg_id,type,area,climate,ca_climate,grid_region,hr_wwhp
+180,Academic,1000,3C,12,CAISO,tool_generic_modular_small
+181,Academic,5000,3B,12,CAISO,tool_generic_modular
+189,Lab,10000,3C,3,CAISO,tool_generic_centrifugal
+191,Lab,7000,3C,3,CAISO,tool_generic_centrifugal
+196,Lab,6000,3C,3,CAISO,tool_generic_centrifugal
+205,Lab/Office,8000,3C,3,CAISO,tool_generic_modular

@@ -1,0 +1,10 @@
+detail,,,Nominal heating capacity,Nominal cooling capacity,Hot water supply temperature at nom cap.,Chilled water supply temperature at nom. Cap.,Operating weight,,,,Min circuit ampacity,Type of refrigerant used,Refrigerant charge (total),Minimum turndown capability,
+units,(-),(-),(W),(W),(°C),(°C),(kg),(m),(m),(m),(A),(-),(kg),(fraction),
+,,,,,,,,,,,,,,,
+hr_wwhp_id,manufacturer,model,nom_hw_cap,nom_chw_cap,hwst,chwst,oper_weight,width,length,height,mca,refrig_id,charge,turndown,comment
+york_yvwh_140,York,YVWH,"1,465,000","1,089,960",60,7.2,10801,2.16,4.24,2.47,589,R1234ze,420,0.23,From manufacturer specs
+carr_30XW_110,Carrier,30XW375,"1,298,061","1,166,221",43.33,5.56,7552,1.22,4.06,2.01,579.8,R134A,471.74,0.15,"From manufacturer specs, turndown from manual of carrier 30XW liquid chiller with R134a series (https://www.carrier.com/commercial/en/kw/products/commercial/chillers/30xw/)"
+tool_generic_modular,,,210960,,48.9,,,,,,,R454B,29,0.3,
+tool_generic_centrifugal,,,1054800,,32.2,,,,,,,R454B,200,0.3,
+tool_generic_modular_small,,,105500,,48.9,,,,,,,R454B,23,0.5,
+tool_hr05,,,1758000,,48.9,,,,,,,R515B,600000,0.2,

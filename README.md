@@ -2,12 +2,18 @@
 
 **Authors**: Urwa Irfan, Jiwon Park, Paul Raftery
 
-**Description**: add description
+**Description**: add
 
-**Inputs**: add inputs
+**File Structure**: add
+
+**Inputs**: add inputs/sources
 
 **Dependencies**: See `environment.yml`.
 
 **Publications**:
 - TBD
+
+**TODO**:
+- Add data dictionary for all data files
+-
 

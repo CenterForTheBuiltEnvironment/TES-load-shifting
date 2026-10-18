@@ -1,0 +1,338 @@
+```{r}
+# load packages
+library(tidyverse)
+library(arrow)
+library(janitor)
+```
+
+```{r}
+# load data
+df = read_parquet("../data/loads/B1_to_B213.parquet", as_data_frame=T)  |>
+  collect() |>
+  arrange(building, timestamp)
+metadata = read_csv("../data/loads/metadata.csv")
+summary = read_csv("../data/loads/load_summary.csv")
+```
+
+```{r}
+# extract measured building loads
+df_measured = filter(df, source == "measured")
+metadata_measured = filter(metadata, source == "measured") |> drop_na()
+summary_measured = summary |> 
+    filter(source == "measured") |>
+    mutate(loopvar = str_c(loop, " ", variable)) |>
+    select(building, value, loopvar) |>
+    pivot_wider(
+        names_from = loopvar,
+        values_from = value
+    )
+bldgs = metadata_measured |> distinct(building) |> pull()
+```
+
+```{r}
+# identify buildings with qood quality data
+# defined here as less than 1000 hours of missing data (in any column)
+
+quality = tibble(building = bldgs, total_hrs = NA, clean_hrs = NA, missing_hrs = NA, start_date = as.POSIXct(NA), end_date = as.POSIXct(NA))
+
+for (i in bldgs) {
+    df_bldg = df_measured |> filter(building == i)
+    df_bldg_clean = df_bldg |> drop_na()
+    quality$total_hrs[quality$building == i] = nrow(df_bldg)
+    quality$clean_hrs[quality$building == i] = nrow(df_bldg_clean)
+    quality$start_date[quality$building == i] = min(df_bldg$timestamp)
+    quality$end_date[quality$building == i] = max(df_bldg$timestamp)
+}
+
+quality = quality |> 
+    mutate(missing_hrs = total_hrs - clean_hrs) |>
+    filter(missing_hrs < 1000) |>
+    left_join(metadata) |>
+    left_join(select(summary_measured, building,
+    `max heating load / max cooling load ratio_of_peak_heating_and_cooling`,
+    `annual heating load / annual cooling load annual_heating_and_cooling_ratio`,
+    `sum(min(cooling*(1+1/COP), heating)) / sum(heating) heat_recovery_heating_fraction`
+    # `simultaneous operation: both heating and cooling loads > 0 simultaneous_heating_and_cooling_hours`,
+    # `simultaneous operation: both heating and cooling loads > 0 simultaneous_heating_and_cooling_hour_ratio`
+    ))
+print(quality, n = Inf)
+```
+
+``` {r}
+# load plots for one building
+num = 196
+plot = df_measured |> filter(building == num) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(cooling_W = -cooling_W)
+    
+plot |>
+    select(timestamp, heating_W, cooling_W, simultaneous_W) |>
+    pivot_longer(
+        cols = c(heating_W, cooling_W, simultaneous_W),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(timestamp, value, color = meter)) +
+        geom_line() +
+        scale_color_manual(values = c("blue", "red", "yellow")) +
+        labs(title = str_c("building ", num))
+
+plot |>
+    ggplot(aes(timestamp, simultaneous_W)) +
+        geom_line() +
+        labs(title = str_c("simultaneous load - building ", num))
+```
+
+```{r}
+# filtered buildings - cooling dominant
+cooling = filter(quality, `annual heating load / annual cooling load annual_heating_and_cooling_ratio` < 1)
+
+plot_clg = df_measured |> 
+    filter(as.double(building) %in% cooling$building) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(cooling_W = -cooling_W) |>
+    mutate(simultaneous_clg_W = -simultaneous_W) |>
+    select(building, timestamp, heating_W, cooling_W, simultaneous_W, simultaneous_clg_W) |>
+    pivot_longer(
+        cols = c(heating_W, cooling_W, simultaneous_W, simultaneous_clg_W),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(timestamp, value, color = meter)) +
+        geom_line() +
+        scale_color_manual(values = c("blue", "red", "yellow", "yellow")) +
+        facet_grid(building ~ ., scales = "free") +
+        labs(title = "cooling dominant buildings") +
+        theme(legend.position = "top")
+
+ggsave("../figs/dataset/cooling_dominant.png", plot = plot_clg)
+plot_clg
+```
+
+```{r}
+# filtered buildings - heating dominant
+heating = filter(quality, `annual heating load / annual cooling load annual_heating_and_cooling_ratio` > 1)
+
+plot_htg = df_measured |> filter(as.double(building) %in% heating$building) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(cooling_W = -cooling_W) |>
+    mutate(simultaneous_clg_W = -simultaneous_W) |>
+    select(building, timestamp, heating_W, cooling_W, simultaneous_W,simultaneous_clg_W) |>
+    pivot_longer(
+        cols = c(heating_W, cooling_W, simultaneous_W, simultaneous_clg_W),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(timestamp, value, color = meter)) +
+        geom_line() +
+        scale_color_manual(values = c("blue", "red", "yellow", "yellow")) +
+        facet_grid(building ~ ., scales = "free") +
+        labs(title = "heating dominant buildings") +
+        theme(legend.position = "top")
+
+ggsave("../figs/dataset/heating_dominant.png", plot = plot_htg, height = 10, units = "in")
+plot_htg
+```
+
+```{r}
+# filtered buildings - aggregated by hour per month
+plot2 = df_measured |>
+    filter(as.double(building) %in% heating$building) |> # edit this to cooling/heating
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(month = month(timestamp, label=T), hour = hour(timestamp)) |>
+    select(building, month, hour, heating_W, cooling_W, simultaneous_W) |>
+    group_by(building, month, hour) |>
+    summarise(hhw = sum(heating_W), chw = -sum(cooling_W)) |>
+    pivot_longer(
+        cols = c(hhw, chw),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(hour, value, color = meter)) +
+        geom_line() +
+        geom_hline(yintercept = 0, linetype = 2) +
+        scale_color_manual(values = c("blue", "red", "yellow")) +
+        facet_grid(building ~ month, scales = "free") +
+        labs(title = str_c("aggregated hourly load (heating dominant buildings)"))
+
+ggsave("../figs/dataset/heating_dominant_hr.png", plot = plot2, width = 15, units = "in")
+plot2
+```
+
+```{r}
+# filtered buildings - aggregated by day per month
+plot3 = df_measured |>
+    filter(as.double(building) %in% cooling$building) |> # edit this to cooling/heating
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(month = month(timestamp, label=T), day = day(timestamp)) |>
+    select(building, month, day, heating_W, cooling_W, simultaneous_W) |>
+    group_by(building, month, day) |>
+    summarise(hhw = sum(heating_W), chw = -sum(cooling_W)) |>
+    pivot_longer(
+        cols = c(hhw, chw),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(day, value, color = meter)) +
+        geom_line() +
+        geom_hline(yintercept = 0, linetype = 2) +
+        scale_color_manual(values = c("blue", "red", "yellow")) +
+        facet_grid(building ~ month, scales = "free_y") +
+        labs(title = "aggregated daily load (cooling dominant buildings)")
+
+ggsave("../figs/dataset/cooling_dominant_day.png", plot = plot3, height = 10, width = 15, units = "in")
+plot3
+```
+
+
+```{r}
+# final buildings for HHW paper
+final_bldg_ids = c(181, 205, 180, 196, 189, 191)
+final_bldgs = filter(quality, building %in% final_bldg_ids)
+
+# marked ! are summer to summer data not jan-dec
+# !181 cooling dominant, low heat recovery potential (very seasonal HHW/CHW)
+    # replace with 212 if needed but it's missing more data
+# 205 cooling dominant, high heat recovery potential (consistent HHW all year, CHW peaks in summer)
+# !180 heating dominant, low heat recovery potential (very seasonal HHW/CHW) -> load side with seasonal switchover, only helps reduce HHW capacity
+    # could be replaced with 189 see below
+# !196 heating dominant, high heat recovery potential (most of CHW is available to reject to HHW, much more HHW though) -> HHW load side or CW, 
+    # or replace with 202, good data, just weird - consistent CHW with much higher HHW
+
+# 189 heating dominant (consistent HHW all year, low CHW load outside summer, but peaks are always mismatched - could be an interesting case)
+# 191 heating dominant (similar to above, but peaks are matched)
+```
+
+```{r}
+# final buildings - loads 
+plot_final = df_measured |> filter(as.double(building) %in% final_bldgs$building) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(cooling_W = -cooling_W) |>
+    mutate(simultaneous_clg_W = -simultaneous_W) |>
+    select(building, timestamp, heating_W, cooling_W, simultaneous_W, simultaneous_clg_W) |>
+    pivot_longer(
+        cols = c(heating_W, cooling_W, simultaneous_W, simultaneous_clg_W),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(timestamp, value, color = meter)) +
+        geom_line(show.legend = F) +
+        scale_color_manual(values = c("blue", "red", "yellow", "yellow")) +
+        facet_grid(building ~ ., scales = "free") +
+        labs(title = "final")
+
+plot_final
+ggsave("../figs/dataset/final.png", plot = plot_final)#, height = 10, units = "in")
+```
+
+```{r}
+# final buildings - aggregated by hour per month
+plot_final_2 = df_measured |>
+    filter(as.double(building) %in% final_bldgs$building) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(month = month(timestamp, label=T), hour = hour(timestamp)) |>
+    select(building, month, hour, heating_W, cooling_W, simultaneous_W) |>
+    group_by(building, month, hour) |>
+    summarise(hhw = sum(heating_W), chw = -sum(cooling_W)) |>
+    pivot_longer(
+        cols = c(hhw, chw),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(hour, value, color = meter)) +
+        geom_line() +
+        geom_hline(yintercept = 0, linetype = 2) +
+        scale_color_manual(values = c("blue", "red", "yellow")) +
+        facet_grid(building ~ month, scales = "free") +
+        labs(title = str_c("aggregated hourly load (final)"))
+
+plot_final_2
+ggsave("../figs/dataset/final_hr.png", plot = plot_final_2, width = 15, units = "in")
+```
+
+```{r}
+# final buildings - aggregated by day per month
+plot_final_3 = df_measured |>
+    filter(as.double(building) %in% final_bldgs$building) |> 
+    mutate(simultaneous_W = pmin(heating_W, cooling_W)) |>
+    mutate(month = month(timestamp, label=T), day = day(timestamp)) |>
+    select(building, month, day, heating_W, cooling_W, simultaneous_W) |>
+    group_by(building, month, day) |>
+    summarise(hhw = sum(heating_W), chw = -sum(cooling_W)) |>
+    pivot_longer(
+        cols = c(hhw, chw),
+        names_to = "meter",
+        values_to = "value") |>
+    ggplot(aes(day, value, color = meter)) +
+        geom_line() +
+        geom_hline(yintercept = 0, linetype = 2) +
+        scale_color_manual(values = c("blue", "red", "yellow")) +
+        facet_grid(building ~ month, scales = "free") +
+        labs(title = str_c("aggregated daily load (final)"))
+
+plot_final_3
+ggsave("../figs/dataset/final_day.png", plot = plot_final_3, width = 15, units = "in")
+```
+
+```{r}
+# peak OATs
+df_measured |>
+    filter(as.double(building) %in% final_bldgs$building) |>
+    group_by(building) |>
+    summarize(min_oat = min(t_out_C, na.rm=T))
+```
+
+```{r}
+# OAT & load relationship
+df_measured |>
+    filter(as.double(building) %in% final_bldgs$building) |>
+    ggplot(aes(t_out_C, heating_W)) +
+        geom_point() +
+        geom_smooth(method="lm") +
+        facet_wrap(~ building)
+```
+
+```{r}
+# design day - hhw/chw
+
+loop = "heating_W"
+df_bldg = df_measured |>
+    # filter(as.double(building) %in% final_bldgs$building) |>
+    filter(building == "189") |>
+    filter(!is.na(heating_W),!is.na(cooling_W),!is.na(t_out_C))
+
+peak_dates = df_bldg |>
+    mutate(date = date(timestamp)) |>
+    group_by(date) |>
+    summarize(total_wh = sum(.data[[loop]]), num_hrs = n()) |>
+    arrange(desc(total_wh))
+
+peakdate = head(peak_dates, 1)$date
+peakdayloads = filter(df_bldg, date(timestamp) == peakdate)
+peakdayloads
+```
+
+```{r}
+# design day - heat recovery
+
+loop = "heating_W"
+df_bldg = df_measured |>
+    # filter(as.double(building) %in% final_bldgs$building) |>
+    filter(building == "189") |>
+    filter(!is.na(heating_W),!is.na(cooling_W),!is.na(t_out_C))
+
+date = ymd("2023-12-05")
+day = df_bldg |>
+    filter(date(timestamp) %in% date)
+
+peak_dates = df_bldg |>
+    mutate(date = date(timestamp)) |>
+    group_by(date) |>
+    summarize(
+        total_heating_wh = sum(heating_W),
+        total_cooling_wh = sum(cooling_W),
+        num_hrs = n()) |>
+    mutate(
+        total_hhw_from_cooling = total_cooling_wh / (1-1/4), # assumes 4 COP_h, should calculate actual later
+        total_chw_from_heating = total_heating_wh * (1-1/4),
+        hr_heating_fraction = total_hhw_from_cooling / total_heating_wh,
+        hr_cooling_fraction = total_chw_from_heating / total_cooling_wh) |>
+    arrange(desc(hr_heating_fraction))
+
+peakdate = head(peak_dates, 1)$date
+peakdayloads = filter(df_bldg, date(timestamp) == peakdate)
+peakdayloads
+```

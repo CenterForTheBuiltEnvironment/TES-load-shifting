@@ -1,0 +1,10 @@
+detail,ASHRAE refrigerant class,AR5 global warming potential (100 year),
+units,(-),(kg CO2e/kg refrigerant),
+,,,
+refrig_id,class,gwp,comment
+R410A,A1,2088,-
+R1234ze,A2L,6,-
+R454B,A2L,466,-
+R290,A3,0.06,-
+R134A,A1,1470,-
+R515B,A1,292,

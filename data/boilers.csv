@@ -1,0 +1,9 @@
+detail,boiler annual efficiency,
+units,(fraction),
+,,
+boiler_id,eff,comment
+vlow,0.4,-
+low,0.5,-
+moderate,0.7,-
+high,0.8,
+vhigh,0.9,

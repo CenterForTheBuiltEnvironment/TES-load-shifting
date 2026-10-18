@@ -1,0 +1,214 @@
+building,source,Climate,Construction Year,Building Type,City,Floor Area (m2),Grid Region,CA Climate Zone
+1,simulation,5B,2020s,Hospital,Denver,22000,RMRG,NA
+2,simulation,8,2020s,HotelLarge,Fairbanks,11000,AKGD,NA
+3,simulation,4C,2000s,HotelLarge,Seattle,11000,NWPP,NA
+4,simulation,6B,2000s,HotelLarge,GreatFalls,11000,NWPP,NA
+5,simulation,5C,2020s,OfficeLarge,PortAngeles,46000,NWPP,NA
+6,simulation,3B,2020s,Hospital,SanDiego,22000,CAISO,7
+7,simulation,4B,2000s,Hospital,Albuquerque,22000,SRSG,NA
+8,simulation,1A,2000s,HotelLarge,Miami,11000,FRCC,NA
+9,simulation,2A,2020s,OutPatientHealthCare,Tampa,4000,FRCC,NA
+10,simulation,5C,2020s,HotelLarge,PortAngeles,11000,NWPP,NA
+11,simulation,5C,2020s,OutPatientHealthCare,PortAngeles,4000,NWPP,NA
+12,simulation,7,2020s,OfficeLarge,InternationalFalls,46000,MROE,NA
+13,simulation,4A,2000s,HotelLarge,NewYork,11000,NYCW,NA
+14,simulation,5B,2020s,OutPatientHealthCare,Denver,4000,RMRG,NA
+15,simulation,4C,2000s,OutPatientHealthCare,Seattle,4000,NWPP,NA
+16,simulation,5C,2020s,Hospital,PortAngeles,22000,NWPP,NA
+17,simulation,2B,2000s,OutPatientHealthCare,Tucson,4000,AZNM,NA
+18,simulation,3A,2000s,OutPatientHealthCare,Atlanta,4000,SRCE,NA
+19,simulation,6B,2020s,OutPatientHealthCare,GreatFalls,4000,NWPP,NA
+20,simulation,7,2020s,OutPatientHealthCare,InternationalFalls,4000,MROE,NA
+21,simulation,3B,2000s,Hospital,ElPaso,22000,SRSG,NA
+22,simulation,8,2000s,Hospital,Fairbanks,22000,AKGD,NA
+23,simulation,3A,2020s,HotelLarge,Atlanta,11000,SRCE,NA
+24,simulation,1A,2020s,OfficeLarge,Miami,46000,FRCC,NA
+25,simulation,3B,2020s,HotelLarge,SanDiego,11000,CAISO,7
+26,simulation,8,2000s,OutPatientHealthCare,Fairbanks,4000,AKGD,NA
+27,simulation,5A,2000s,HotelLarge,Chicago,11000,MROE,NA
+28,simulation,2A,2020s,Hospital,Tampa,22000,FRCC,NA
+29,simulation,6A,2000s,OfficeLarge,Rochester,46000,NYCW,NA
+30,simulation,3C,2020s,HotelLarge,SanJose,11000,CAISO,4
+31,simulation,5A,2020s,HotelLarge,Chicago,11000,MROE,NA
+32,simulation,5C,2000s,HotelLarge,PortAngeles,11000,NWPP,NA
+33,simulation,1A,2020s,HotelLarge,Miami,11000,FRCC,NA
+34,simulation,3C,2000s,OfficeLarge,SanJose,46000,CAISO,4
+35,simulation,3C,2000s,OfficeLarge,SanFrancisco,46000,CAISO,3
+36,simulation,2A,2020s,OfficeLarge,Houston,46000,ERCT,NA
+37,simulation,3C,2020s,Hospital,SanJose,22000,CAISO,4
+38,simulation,5A,2000s,OfficeLarge,Buffalo,46000,NYCW,NA
+39,simulation,2A,2000s,OfficeLarge,Houston,46000,ERCT,NA
+40,simulation,1A,2000s,OfficeLarge,Miami,46000,FRCC,NA
+41,simulation,2A,2020s,OutPatientHealthCare,Houston,4000,ERCT,NA
+42,simulation,4B,2000s,HotelLarge,Albuquerque,11000,SRSG,NA
+43,simulation,3A,2000s,HotelLarge,Sacramento,11000,CAISO,12
+44,simulation,3A,2000s,Hospital,Atlanta,22000,SRCE,NA
+45,simulation,5A,2020s,Hospital,Buffalo,22000,NYCW,NA
+46,simulation,3A,2020s,OutPatientHealthCare,Atlanta,4000,SRCE,NA
+47,simulation,8,2000s,OfficeLarge,Fairbanks,46000,AKGD,NA
+48,simulation,3B,2020s,OutPatientHealthCare,ElPaso,4000,SRSG,NA
+49,simulation,4B,2000s,OfficeLarge,Albuquerque,46000,SRSG,NA
+50,simulation,3B,2000s,HotelLarge,SanDiego,11000,CAISO,7
+51,simulation,4B,2000s,OutPatientHealthCare,Albuquerque,4000,SRSG,NA
+52,simulation,5A,2000s,OutPatientHealthCare,Buffalo,4000,NYCW,NA
+53,simulation,2B,2020s,Hospital,Tucson,22000,AZNM,NA
+54,simulation,3C,2020s,Hospital,SanFrancisco,22000,CAISO,3
+55,simulation,5B,2000s,HotelLarge,Denver,11000,RMRG,NA
+56,simulation,3B,2000s,OfficeLarge,ElPaso,46000,SRSG,NA
+57,simulation,5A,2020s,OutPatientHealthCare,Chicago,4000,MROE,NA
+58,simulation,5A,2000s,HotelLarge,Buffalo,11000,NYCW,NA
+59,simulation,8,2000s,HotelLarge,Fairbanks,11000,AKGD,NA
+60,simulation,3C,2000s,HotelLarge,LosAngeles,11000,CAISO,6
+61,simulation,2B,2020s,OutPatientHealthCare,Tucson,4000,AZNM,NA
+62,simulation,5A,2000s,OutPatientHealthCare,Chicago,4000,MROE,NA
+63,simulation,3B,2020s,OfficeLarge,ElPaso,46000,SRSG,NA
+64,simulation,2A,2020s,HotelLarge,Houston,11000,ERCT,NA
+65,simulation,7,2020s,Hospital,InternationalFalls,22000,MROE,NA
+66,simulation,8,2020s,OutPatientHealthCare,Fairbanks,4000,AKGD,NA
+67,simulation,5A,2020s,OutPatientHealthCare,Buffalo,4000,NYCW,NA
+68,simulation,3A,2000s,Hospital,Sacramento,22000,CAISO,12
+69,simulation,5A,2020s,OfficeLarge,Buffalo,46000,NYCW,NA
+70,simulation,6B,2020s,Hospital,GreatFalls,22000,NWPP,NA
+71,simulation,7,2000s,OfficeLarge,InternationalFalls,46000,MROE,NA
+72,simulation,3B,2000s,OutPatientHealthCare,ElPaso,4000,SRSG,NA
+73,simulation,3C,2000s,OfficeLarge,LosAngeles,46000,CAISO,6
+74,simulation,4C,2020s,OfficeLarge,Seattle,46000,NWPP,NA
+75,simulation,3C,2000s,Hospital,SanJose,22000,CAISO,4
+76,simulation,3C,2020s,HotelLarge,LosAngeles,11000,CAISO,6
+77,simulation,5A,2000s,OfficeLarge,Chicago,46000,MROE,NA
+78,simulation,2B,2020s,HotelLarge,Tucson,11000,AZNM,NA
+79,simulation,4A,2020s,OutPatientHealthCare,NewYork,4000,NYCW,NA
+80,simulation,3C,2020s,Hospital,LosAngeles,22000,CAISO,6
+81,simulation,5A,2000s,Hospital,Buffalo,22000,NYCW,NA
+82,simulation,6B,2020s,HotelLarge,GreatFalls,11000,NWPP,NA
+83,simulation,4A,2020s,Hospital,NewYork,22000,NYCW,NA
+84,simulation,4C,2020s,OutPatientHealthCare,Seattle,4000,NWPP,NA
+85,simulation,5C,2000s,OfficeLarge,PortAngeles,46000,NWPP,NA
+86,simulation,6B,2000s,OfficeLarge,GreatFalls,46000,NWPP,NA
+87,simulation,1A,2000s,Hospital,Miami,22000,FRCC,NA
+88,simulation,2A,2020s,HotelLarge,Tampa,11000,FRCC,NA
+89,simulation,2B,2000s,Hospital,Tucson,22000,AZNM,NA
+90,simulation,2A,2000s,OutPatientHealthCare,Tampa,4000,FRCC,NA
+91,simulation,3B,2020s,HotelLarge,ElPaso,11000,SRSG,NA
+92,simulation,4A,2000s,Hospital,NewYork,22000,NYCW,NA
+93,simulation,8,2020s,OfficeLarge,Fairbanks,46000,AKGD,NA
+94,simulation,2A,2000s,Hospital,Tampa,22000,FRCC,NA
+95,simulation,3A,2000s,OfficeLarge,Sacramento,46000,CAISO,12
+96,simulation,3C,2000s,HotelLarge,SanJose,11000,CAISO,4
+97,simulation,3C,2020s,OutPatientHealthCare,LosAngeles,4000,CAISO,6
+98,simulation,5A,2020s,HotelLarge,Buffalo,11000,NYCW,NA
+99,simulation,4C,2020s,Hospital,Seattle,22000,NWPP,NA
+100,simulation,3A,2020s,OutPatientHealthCare,Sacramento,4000,CAISO,12
+101,simulation,4B,2020s,OfficeLarge,Albuquerque,46000,SRSG,NA
+102,simulation,5C,2000s,Hospital,PortAngeles,22000,NWPP,NA
+103,simulation,3C,2020s,OfficeLarge,LosAngeles,46000,CAISO,6
+104,simulation,3C,2000s,OutPatientHealthCare,SanJose,4000,CAISO,4
+105,simulation,6A,2020s,Hospital,Rochester,22000,NYCW,NA
+106,simulation,3A,2020s,OfficeLarge,Atlanta,46000,SRCE,NA
+107,simulation,8,2020s,Hospital,Fairbanks,22000,AKGD,NA
+108,simulation,5B,2020s,OfficeLarge,Denver,46000,RMRG,NA
+109,simulation,3C,2000s,Hospital,LosAngeles,22000,CAISO,6
+110,simulation,7,2000s,OutPatientHealthCare,InternationalFalls,4000,MROE,NA
+111,simulation,6A,2020s,HotelLarge,Rochester,11000,NYCW,NA
+112,simulation,3B,2020s,OutPatientHealthCare,SanDiego,4000,CAISO,7
+113,simulation,1A,2020s,OutPatientHealthCare,Miami,4000,FRCC,NA
+114,simulation,3C,2020s,OfficeLarge,SanFrancisco,46000,CAISO,3
+115,simulation,3A,2020s,Hospital,Atlanta,22000,SRCE,NA
+116,simulation,3B,2000s,OutPatientHealthCare,SanDiego,4000,CAISO,7
+117,simulation,3A,2000s,OfficeLarge,Atlanta,46000,SRCE,NA
+118,simulation,6B,2020s,OfficeLarge,GreatFalls,46000,NWPP,NA
+119,simulation,2B,2000s,HotelLarge,Tucson,11000,AZNM,NA
+120,simulation,4C,2000s,OfficeLarge,Seattle,46000,NWPP,NA
+121,simulation,5A,2000s,Hospital,Chicago,22000,MROE,NA
+122,simulation,4A,2020s,HotelLarge,NewYork,11000,NYCW,NA
+123,simulation,2A,2000s,Hospital,Houston,22000,ERCT,NA
+124,simulation,2A,2000s,HotelLarge,Tampa,11000,FRCC,NA
+125,simulation,3C,2020s,HotelLarge,SanFrancisco,11000,CAISO,3
+126,simulation,3B,2000s,OfficeLarge,SanDiego,46000,CAISO,7
+127,simulation,6B,2000s,Hospital,GreatFalls,22000,NWPP,NA
+128,simulation,6A,2000s,OutPatientHealthCare,Rochester,4000,NYCW,NA
+129,simulation,6B,2000s,OutPatientHealthCare,GreatFalls,4000,NWPP,NA
+130,simulation,4A,2020s,OfficeLarge,NewYork,46000,NYCW,NA
+131,simulation,6A,2000s,HotelLarge,Rochester,11000,NYCW,NA
+132,simulation,3C,2020s,OutPatientHealthCare,SanJose,4000,CAISO,4
+133,simulation,3B,2020s,Hospital,ElPaso,22000,SRSG,NA
+134,simulation,4B,2020s,HotelLarge,Albuquerque,11000,SRSG,NA
+135,simulation,3C,2000s,HotelLarge,SanFrancisco,11000,CAISO,3
+136,simulation,1A,2020s,Hospital,Miami,22000,FRCC,NA
+137,simulation,3A,2000s,HotelLarge,Atlanta,11000,SRCE,NA
+138,simulation,2B,2020s,OfficeLarge,Tucson,46000,AZNM,NA
+139,simulation,3A,2000s,OutPatientHealthCare,Sacramento,4000,CAISO,12
+140,simulation,5C,2000s,OutPatientHealthCare,PortAngeles,4000,NWPP,NA
+141,simulation,5A,2020s,OfficeLarge,Chicago,46000,MROE,NA
+142,simulation,4B,2020s,Hospital,Albuquerque,22000,SRSG,NA
+143,simulation,3C,2000s,OutPatientHealthCare,LosAngeles,4000,CAISO,6
+144,simulation,3A,2020s,OfficeLarge,Sacramento,46000,CAISO,12
+145,simulation,4A,2000s,OutPatientHealthCare,NewYork,4000,NYCW,NA
+146,simulation,5B,2000s,Hospital,Denver,22000,RMRG,NA
+147,simulation,6A,2020s,OutPatientHealthCare,Rochester,4000,NYCW,NA
+148,simulation,3C,2020s,OfficeLarge,SanJose,46000,CAISO,4
+149,simulation,5B,2000s,OfficeLarge,Denver,46000,RMRG,NA
+150,simulation,4B,2020s,OutPatientHealthCare,Albuquerque,4000,SRSG,NA
+151,simulation,2A,2020s,OfficeLarge,Tampa,46000,FRCC,NA
+152,simulation,3B,2000s,HotelLarge,ElPaso,11000,SRSG,NA
+153,simulation,5B,2000s,OutPatientHealthCare,Denver,4000,RMRG,NA
+154,simulation,5A,2020s,Hospital,Chicago,22000,MROE,NA
+155,simulation,4A,2000s,OfficeLarge,NewYork,46000,NYCW,NA
+156,simulation,3C,2020s,OutPatientHealthCare,SanFrancisco,4000,CAISO,3
+157,simulation,2A,2020s,Hospital,Houston,22000,ERCT,NA
+158,simulation,6A,2000s,Hospital,Rochester,22000,NYCW,NA
+159,simulation,3B,2000s,Hospital,SanDiego,22000,CAISO,7
+160,simulation,4C,2020s,HotelLarge,Seattle,11000,NWPP,NA
+161,simulation,3A,2020s,HotelLarge,Sacramento,11000,CAISO,12
+162,simulation,3B,2020s,OfficeLarge,SanDiego,46000,CAISO,7
+163,simulation,7,2020s,HotelLarge,InternationalFalls,11000,MROE,NA
+164,simulation,3C,2000s,OutPatientHealthCare,SanFrancisco,4000,CAISO,3
+165,simulation,2A,2000s,OutPatientHealthCare,Houston,4000,ERCT,NA
+166,simulation,2B,2000s,OfficeLarge,Tucson,46000,AZNM,NA
+167,simulation,5B,2020s,HotelLarge,Denver,11000,RMRG,NA
+168,simulation,6A,2020s,OfficeLarge,Rochester,46000,NYCW,NA
+169,simulation,2A,2000s,HotelLarge,Houston,11000,ERCT,NA
+170,simulation,4C,2000s,Hospital,Seattle,22000,NWPP,NA
+171,simulation,1A,2000s,OutPatientHealthCare,Miami,4000,FRCC,NA
+172,simulation,2A,2000s,OfficeLarge,Tampa,46000,FRCC,NA
+173,simulation,7,2000s,Hospital,InternationalFalls,22000,MROE,NA
+174,simulation,3C,2000s,Hospital,SanFrancisco,22000,CAISO,3
+175,simulation,3A,2020s,Hospital,Sacramento,22000,CAISO,12
+176,simulation,7,2000s,HotelLarge,InternationalFalls,11000,MROE,NA
+177,measured,3B,2010s,Academic,San Francisco,6000,CAISO,3
+178,measured,3B,2020s,Academic,San Francisco,5000,CAISO,3
+179,measured,3B,2020s,Academic,San Francisco,11000,CAISO,12
+180,measured,3C,2020s,Academic,San Francisco,1000,CAISO,12
+181,measured,3B,2020s,Academic,San Francisco,5000,CAISO,12
+182,measured,4A,2000s,Academic,Portland,10000,NA,N/A
+183,measured,3C,2000s,Office,San Francisco,19000,CAISO,3
+184,measured,3C,NA,Warehouse,San Francisco,10000,CAISO,3
+185,measured,3C,NA,Warehouse,San Francisco,4000,CAISO,3
+186,measured,3C,2000s,Office,San Francisco,12000,CAISO,3
+187,measured,3C,2010s,Other/Gymnasium,San Francisco,4000,CAISO,3
+188,measured,3C,2010s,Office,San Francisco,15000,CAISO,3
+189,measured,3C,2000s,Lab,San Francisco,10000,CAISO,3
+190,measured,3C,2000s,Lab,San Francisco,11000,CAISO,3
+191,measured,3C,2000s,Lab,San Francisco,7000,CAISO,3
+192,measured,3C,2000s,Office,San Francisco,11000,CAISO,3
+193,measured,3C,2000s,Office,San Francisco,10000,CAISO,3
+194,measured,3C,2000s,Lab,San Francisco,9000,CAISO,3
+195,measured,3C,2000s,Lab,San Francisco,8000,CAISO,3
+196,measured,3C,2000s,Lab,San Francisco,6000,CAISO,3
+197,measured,4A,2020s,Academic/Lab,Louisville,5000,SRCE,N/A
+198,measured,4C,2010s,Medical Office,Oregon,9000,NA,N/A
+199,measured,3B,1990s,Medical Office,San Francisco,4000,CAISO,3
+200,measured,3B,1990s,Medical Office,Los Angeles,6000,CAISO,9
+201,measured,3B,2010s,Lab,Los Angeles,12000,CAISO,10
+202,measured,3C,2010s,Medical Office,San Francisco,21000,CAISO,12
+203,measured,3B,2020s,Academic/Office,Los Angeles,8000,CAISO,9
+204,measured,3C,1980s,Lab/Office,San Francisco,8000,CAISO,3
+205,measured,3C,2010s,Lab/Office,San Francisco,8000,CAISO,3
+206,measured,3C,2010s,Lab/Office,San Francisco,3000,CAISO,3
+207,measured,3C,2010s,Lab/Office,San Francisco,4000,CAISO,3
+208,measured,3C,2000s,Lab,San Francisco,9000,CAISO,3
+209,measured,3C,1960s,Lab,San Francisco,7000,CAISO,3
+210,measured,3C,1990s,Lab/Office,San Francisco,4000,CAISO,3
+211,measured,3C,2010s,Tech HQ,San Francisco,46000,CAISO,4
+212,measured,3C,2020s,Tech HQ,San Francisco,70000,CAISO,4
+213,measured,3C,2020s,Medical Office,San Francisco,17000,CAISO,3

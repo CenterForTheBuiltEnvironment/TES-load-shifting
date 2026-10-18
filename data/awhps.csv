@@ -1,0 +1,9 @@
+detail,,,Nominal heating capacity,Nominal cooling capacity,Hot water supply temperature at nom cap.,Chilled water supply temperature at nom. Cap.,Operating weight,,,,Min circuit ampacity,Type of refrigerant used,Refrigerant charge (total),Minimum turndown capability,Comment
+units,(-),(-),(W),(W),(°C),(°C),(kg),(m),(m),(m),(A),(-),(kg),(fraction),
+,,,,,,,,,,,,,,,
+awhp_id,manufacturer,model,nom_hw_cap,nom_chw_cap,hwst,chwst,weight,width,length,height,mca,refrig_id,charge,turndown,
+aermec_122,Aermec,NRB-HA-800,234400,198300,50,7.2,3082,2.47,3.96,2.21,129,R410A,56,0.5,From manufacturer specifications
+york_air_cooled,York,York YCAL0033EE,NA,100600,NA,7.2,1040,1.14,3.04,1.27,67,R410A,50,0.15,From E+ IDF Dataset
+tool_generic_h_38,,,210960,,38,,,,,,,R454B,54,0.5,
+tool_generic_h_52,,,210960,,52,,,,,,,R454B,54,0.5,
+tool_generic_c,,,,210960,,6.7,,,,,,R454B,54,0.5,
