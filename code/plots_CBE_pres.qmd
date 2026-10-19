@@ -4,6 +4,11 @@ library(lubridate)
 library(ggh4x)
 library(patchwork)
 library(ggplot2)
+library(showtext)
+```
+
+```{r scripts, include = FALSE}
+source("../code/model_run.R")
 ```
 
 ```{r plots_pres_setup, include = FALSE, eval = FALSE}

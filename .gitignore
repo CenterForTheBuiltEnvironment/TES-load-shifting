@@ -1,5 +1,6 @@
 figs/working/*
 paper/load_shifting_*_files
+settings.json
 
 # History files
 .Rhistory
