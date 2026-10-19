@@ -1,0 +1,720 @@
+---
+title: "Sizing and Control Strategies for Hot Water Thermal Energy Storage in All-Electric HVAC Plants"
+author:
+  - Urwa Irfan ^[Center for the Built Environment, University of California at Berkeley, USA] ^[Correspondence to urwa@berkeley.edu], Paul Raftery ^1^, Stet Sanborn ^[SmithGroup]
+date: "`r Sys.Date()`"
+format:
+ docx:
+    toc: false
+    reference-doc: "../format/template.docx"
+    number-sections: true
+    fig-align: center
+editor_options: 
+  markdown:
+    wrap: 72
+bibliography: "../format/Existing_building_decarbonization.bib"
+csl : "../format/chicago-author-date.csl"
+execute:
+  cache: false
+---
+
+```{r knitrsetup, include = FALSE, cache = FALSE}
+# knitr setup
+knitr::opts_chunk$set(
+  echo = F,
+  message = F,
+  warning = F,
+  dev = "jpeg",
+  cache = T,
+  dpi = 300,
+  fig.show = "hold",
+  fig.pos = "b",
+  fig.width = 6.5, fig.height = 8.5, # these are the default figure sizes
+  fig.path = "../figs/paper/"
+)
+
+# str(knitr::opts_chunk$get()) # run this in the console for all knitr config options
+```
+
+```{r librariesandthemesettings, include = FALSE, cache = FALSE}
+# load all required libraries and configure themes
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(patchwork)
+library(flextable)
+library(showtext)
+
+options(
+  scipen = 999, # turn off scientific notation,
+  digits = 2, # set default significant digits to 2, note this only works after a decimal point, use round() or format() to reduce precision of larger numbers
+  timeout = 60
+)
+
+# set directory
+here::i_am("load_shifting_hhw.qmd")
+
+# or theme light, with some  Cal colors
+# figure theme setup
+# set base font size for plots
+theme_set(theme_light(base_size = 10))
+# cleaner display of 'strips' above facets in plots
+theme_update(
+  strip.background = element_rect(fill = "#F5F5F5", color = "grey"),
+  strip.text = element_text(color = "black"),
+  strip.text.y = element_text(angle = 90),
+  panel.grid = element_line(linetype = "dotted") # lighten gridlines so just visible
+)
+
+# define a reasonably print and color-blind friendly color palette
+# these also conveniently happen to be colors from the official UC Berkeley color palette. https://brand.berkeley.edu/identity-and-visual-design/color
+cal_palette2 <- c("#3B7EA1", "#C4820E")
+# with slight mod to dark yellow for better grayscale performance for 4 color scale
+cal_palette4 <- c("#003262", "#b0750c", "#3b7ea1", "#fdb515")
+# adding 5th color
+cal_palette5 <- c("#003262", "#b0750c", "#3b7ea1", "#fdb515", "#D9661F")
+load_palette = c("#010090", "#8f0300")
+
+final_pal = c("#3b7ea1", "#b0750c", "#003262")
+```
+
+```{r scripts, include = FALSE}
+# source("code/basic_functions.R")
+# source("code/TES_functions.R")
+# source("code/import_data.R")
+# source("code/model_functions.R")
+# source("code/model_scenarios.R")
+source("code/model_run.R")
+```
+
+
+# Abstract {.unnumbered}
+The addition of thermal energy storage (TES) to shift thermal loads to off-peak periods of the day effectively reduces HVAC system energy costs, emissions, and peak electric demand. While cool thermal storage systems are well documented in the existing literature, this study analyzes TES for heating hot water systems. Heating hot water TES is increasingly common as designers switch from gas boilers to heat pumps and is more economical than chilled water TES due to higher system temperature differentials. Additionally, TES systems can be configured for a range of applications, including leveling design day peak loads, minimizing utility costs, reducing short-cycling related wear and tear, capturing capacity from non-simultaneous heat recovery, and improving heat pump efficiency. Current design guidance addressing these various applications is incomplete and dispersed across sources; this paper details appropriate rule-based control strategies that can be adopted for each application. We evaluate annual energy use and emissions for the proposed configurations using marginal grid emissions rates and a plant model with air-source heat pumps for primary heating. The model is analyzed over a dataset of measured heating hot water loads from six existing commercial buildings in California, covering a range of daily and seasonal load profile characteristics. Results show that the addition of TES can simultaneously reduce required heat pump capacity and operational carbon emissions, with up to 15% annual emissions reduction using the minimum tank size for load leveling. The magnitude of these savings is closely tied to both the sizing strategy and the variation in the control signal. For certain load profiles, further emissions reductions can be achieved by increasing the tank volume; while the cost of additional storage is not offset by a reduction in installed heat pump capacity, the carbon mitigation impact is comparable to that of electrifying from gas to electric heating in the first place. By identifying the impact of various sizing and control strategies on emissions across various building load profiles, this study provides actionable findings and recommendations in designing and implementing TES systems.
+
+```{r prep_results, include = FALSE}
+bldg_tags = tibble(
+  building = as.character(c(180, 181, 189, 191, 196, 205)),
+  ID = c("A", "B", "C", "D", "E", "F")
+)
+plot_df = df |> left_join(bldg_tags, by = "building")
+
+plot_results = results_all |>
+  mutate(date = date(datetime)) |>
+  mutate(hour = hour(datetime)) |>
+  mutate(month = month(datetime)) |>
+  mutate(quarter = quarter(datetime)) |>
+  mutate(season = case_when(
+    quarter == 1 ~ "Jan-Mar",
+    quarter == 2 ~ "Apr-Jun",
+    quarter == 3 ~ "Jul-Sep",
+    quarter == 4 ~ "Oct-Dec",
+  )) |>
+  left_join(bldg_tags, by = "building")
+
+baseline_emissions = summary |> 
+  filter(desc == "No TES") |>
+  rename(elec_emissions_base = elec_emissions) |>
+  rename(elec_h_emissions_base = elec_h_emissions) |>
+  select(building, elec_emissions_base, elec_h_emissions_base)
+
+baseline_energy = summary |> 
+  filter(desc == "No TES") |>
+  rename(elec_awhp_h_base = elec_awhp_h) |>
+  select(building, elec_awhp_h_base)
+
+summary = summary |>
+  left_join(baseline_emissions, by = "building") |>
+  left_join(baseline_energy, by = "building") |>
+  left_join(bldg_tags, by = "building") |>
+  mutate(elec_emissions_diff = 100*(elec_emissions - elec_emissions_base)/elec_emissions_base) |>
+  mutate(elec_h_emissions_diff = 100*(elec_h_emissions - elec_h_emissions_base)/elec_h_emissions_base) |>
+  mutate(elec_awhp_h_diff = 100*(elec_awhp_h - elec_awhp_h_base)/elec_awhp_h_base)
+
+awhp_h_curve = awhp_curves %>% filter(awhp_id == "tool_generic_h_52") %>% drop_na(oa_t,cap_h,cop_h) %>% select(oa_t, cop_h,cap_h) %>% mutate(cop_h_percent = cop_h/max(cop_h), cap_h_percent = cap_h/max(cap_h))
+```
+
+# Introduction
+
+Thermal energy storage (TES) is an increasingly common strategy for shifting HVAC loads to favorable conditions for energy consumption or utility costs. It has historically been employed in chilled water (CHW) systems largely to reduce electricity costs and the installed size and cost of refrigeration equipment. As the industry decarbonizes heating systems by switching from gas boilers to heat pumps, there is a growing need to address these same concerns using heating hot water (HHW) TES. Prior research shows that most buildings’ hot water systems operate at low part loads the majority of the time [@rafteryInsightsHydronicHeating2024]. The addition of TES for peak load leveling can thus allow substantial downsizing of air-source heat pumps, resulting in considerable cost savings due to the high first cost of heat pumps. Additionally, since HHW systems typically operate with larger ΔTs than CHW loops, hot water TES provides more storage capacity for the same volume and first cost.
+
+There is limited literature evaluating heat pump – particularly air-to-water heat pump (AWHP) – systems with hot water TES. One study demonstrated the cost effectiveness of a TES-integrated ground-source heat pump system using measured loads from a university campus with various charging control strategies [@ryanApplicationThermalEnergy2022]. Another pilot study installed AWHP with HHW TES systems in California single-family homes [@weigelTechnicalEvaluationAirtoWater2025]. There are additional papers demonstrating operational cost savings from chilled water TES, integrated either with heat pumps or traditional chillers, based on measured data [@woldekidanTechnoEconomicAnalysisAddition2025; @choOptimalControlStrategies2021; @khunStrategyEnergySavings2025; @rahmanFeasibilityThermalEnergy2011; @qiaoFieldTestingSimulation2026], but few use complete annual datasets. There is also a lack of research on the carbon impact of adding TES to a heat pump plant, particularly using marginal operating emissions rates which more accurately capture the variation in daily electricity generation emissions than average rates [@ryanMarginal2024]. @sultanCarbonMitigationPotential2023 simulated a residential CHW TES system and calculated 12% grid emissions reduction over one week of operation.
+
+This paper applies and expands on existing ASHRAE guidance for sizing and controlling cooling TES systems [@glazerjasonASHRAEDesignGuide2019; @ashraeHandbook2024] to evaluate an all-electric heating plant consisting of air-to-water heat pumps and heating hot water TES. We model this using a dataset of full-year measured loads from 6 buildings to assess the contribution of load profile variation on equipment sizing. We quantify the carbon emissions impact of various sizing and control strategies and propose a framework for controlling AWHP-TES systems in order to maximize load shifting potential.
+
+# Methods
+
+## Inputs and Assumptions
+This study uses one year of measurements of outside air temperature and conditioning loads gathered from the building automation systems of six buildings in San Francisco, California (ASHRAE Climate Zone 3C). Load data was either directly metered or calculated from flow meter and temperature sensor measurements. @fig-dataset_szn plots the average seasonal heating hot water (HHW) and chilled water (CHW) loads for each building in the dataset. Buildings A and B are academic buildings; C, D, and E are laboratory buildings; and F is a mixed-use laboratory/office building. 
+
+HVAC energy consumption is modeled with a combination of AWHPs and thermal energy storage tanks. In the scenarios with no storage, the AWHPs are sized to serve the peak hourly heating load, and an air-cooled electric chiller is included to serve any excess chilled water loads. We used the performance data obtained from two different manufacturers to generate curves for heating capacity and coefficient of performance (COP) based on outside air temperature, shown in @fig-awhp_curves, for a nominal 211 kW (720 kBtu/h) modular unit at a HHW supply temperature of 54°C (130°F). 
+
+Any analysis of load shifting – to optimize for an operational parameter such as cost or emissions beyond peak load leveling – is predicated on some form of cost signal to define appropriate charging or discharging periods. This is typically utility cost rates with the goal of minimizing operational cost, but could also be equipment operating efficiency in order to minimize energy consumption. This paper uses electricity use emissions as the cost signal, modeled using long-run marginal grid emissions rates for 2025 sourced from NLR’s Cambium 2024 dataset [@gagnonCambium2024Scenario2024]. This data is easily accessible and clearly demonstrates the tangible environmental impact of different system configurations. All analyzed buildings fall in the CAISO grid region, and we use the MidCase grid scenario. @fig-awhp_curves shows the distribution of hourly grid emissions factors in the selected dataset, highlighting the potential to substantially reduce emissions each day by shifting electrical loads to the hours around midday in this grid region.
+
+## System Sizing
+
+Sizing for AWHP-TES systems depends on the proportion of peak loads the tank is expected to satisfy, and there is a tradeoff between the TES capacity required to serve loads above the AWHP’s maximum capacity under peak load conditions versus the TES capacity available for load shifting. This interaction is described in detail in @casillasConsiderationsIntelligentlySizing2023. The ASHRAE Systems Handbook describes a standard method for chilled water storage which sizes the TES to minimize the total cooling equipment size, such that the latter can meet loads on the peak day by operating at maximum capacity continuously. This is called _partial storage_ (or load leveling) because the TES contributes only partially to the peak load and both chiller and tank must operate, in contrast to _full storage_ where the TES would be sized to fully meet loads (with the cooling plant disabled) during a predetermined on-peak (cost) period.
+
+```{r tbl-bldg_stats, include = FALSE}
+#| tbl-cap: "Building statistics"
+
+stats = tibble(
+  "Building ID" = c("A", "B", "C", "D", "E", "F"), #as.character(c(180, 181, 189, 191, 196, 205)),
+  "Type" = c("Academic", "Academic", "Laboratory", "Laboratory", "Laboratory", "Laboratory/Office"),
+  "Floor area (m²)" = c(1000, 5000, 10000, 7000, 6000, 8000),
+  "Construction decade" = c("2020s", "2020s", "2000s", "2000s", "2000s", "2010s")
+)
+
+# flextable(stats)
+```
+
+```{r fig-dataset_szn}
+#| fig-cap: "Aggregated mean building loads by season"
+#| fig-width: 8
+#| fig-height: 5
+
+dat = plot_df |>
+  mutate(hour = hour(datetime), hhw = hhw/1000, chw = chw/1000)
+
+ann = dat |>
+  group_by(ID) |>
+  summarize(max_hhw = max(hhw))
+
+scaler = ann |>
+  select(ID, max_hhw) |>
+  mutate(zero = 0, hour = 12) |>
+  pivot_longer(cols = c(max_hhw, zero), names_to = "plot", values_to = "value")
+
+plot_means = plot_df |>
+  mutate(month = month(datetime, label=T), hour = hour(datetime)) |>
+  mutate(quarter = quarter(datetime)) |>
+  mutate(season = case_when(
+    quarter == 1 ~ "Jan-Mar",
+    quarter == 2 ~ "Apr-Jun",
+    quarter == 3 ~ "Jul-Sep",
+    quarter == 4 ~ "Oct-Dec",
+  )) |>
+  group_by(ID, quarter, season, hour) |>
+  summarise(hhw = mean(hhw)/1000, chw = mean(chw)/1000) |>
+  pivot_longer(
+    cols = c(hhw, chw),
+    names_to = "meter",
+    values_to = "value") |>
+  ggplot(aes(hour, value, color = meter)) +
+    geom_line() +
+    geom_point(data=filter(scaler, plot=="zero"), aes(y=value), x = NA, inherit.aes = FALSE) +
+    scale_color_manual(values = c("chw" = "blue", "hhw" = "red"), labels = c("chw" = "CHW", "hhw" = "HHW")) +
+    facet_grid(ID ~ reorder(season, quarter), scales = "free") +
+    labs(x = "Hour", y = "Load [kW]", color = "") +
+    scale_y_continuous(labels=comma, sec.axis = sec_axis(~ . * 3.412, name = "Load [kBtu/h]", labels=comma)) +
+    theme(legend.position = "inside", legend.position.inside = c(1, 0.965), legend.justification="right",legend.background = element_blank(), strip.text.y = element_text(angle = 0), axis.title.y.right = element_text(angle = 90))
+
+plot_means
+```
+
+```{r fig-awhp_curves}
+#| fig-cap: "(L) AWHP performance curves and (R) Grid emissions factors with respect to time of day"
+#| fig-width: 10
+#| fig-height: 4.5
+
+awhp_ann = awhp_h_curve |>  slice(1:8)
+cap_max = awhp_ann$cap_h[8]
+cop_max = awhp_ann$cop_h[8]
+oa_max = awhp_ann$oa_t[8]
+ann_max = str_c(round(cap_max/1000), " kW (", round(cap_max*3.412/1000), " kBtu/h),\n", cop_max, " COP @ ", oa_max, "°C (", C_to_f(oa_max), "°F)")
+cap_min = awhp_ann$cap_h[1]
+cop_min = awhp_ann$cop_h[1]
+oa_min = awhp_ann$oa_t[1]
+ann_min = str_c(round(cap_min/1000), " kW (", round(cap_min*3.412/1000), " kBtu/h),\n", cop_min, " COP @ ", oa_min, "°C (", C_to_f(oa_min), "°F)")
+
+perf_plot = awhp_h_curve |>
+  slice(1:9) |>
+  pivot_longer(
+    cols = c(cop_h_percent, cap_h_percent),
+    names_to = "metric",
+    values_to = "perf"
+  ) |>
+  mutate(metric = ifelse(metric == "cop_h_percent", "Heating COP", "Heating capacity")) |>
+  ggplot() +
+    geom_line(aes(oa_t, perf, color = metric)) +
+    labs(x = "Outside air temperature [°C]", y = "Percentage of maximum COP/capacity", color = "") +
+    theme(legend.position = "inside", legend.position.inside = c(1, 0.8), legend.justification="right",legend.background = element_blank()) +
+    annotate("text", x = -10, y = 0.97, hjust = 0, label = ann_max) +
+    annotate("text", x = -10, y = 0.52, hjust = 0, label = ann_min) +
+    scale_color_manual(values = cal_palette2) +
+    scale_y_continuous(limits=c(0.5,1), breaks = seq(0.5, 1, 0.1), labels = percent(seq(0.5,1,0.1))) +
+    scale_x_continuous(sec.axis = sec_axis(~ (. * 1.8 + 32), name = "Outside air temperature [°F]", breaks = seq(20, 100, 10)))
+
+# n95 = plot_results%>%
+#   filter(oa_t>quantile(plot_results$oa_t,.05, na.rm=T))%>%
+#   filter(oa_t<quantile(plot_results$oa_t,.95, na.rm=T)) %>% 
+#   filter(elec_emissions_rate>quantile(plot_results$elec_emissions_rate,.05, na.rm=T))%>%
+#   filter(elec_emissions_rate<quantile(plot_results$elec_emissions_rate,.95, na.rm=T))
+
+# emissions_oat_plot = plot_results |>
+#   filter(building == "180", eq_scen_id == 1) |>
+#   ggplot(aes(oa_t, elec_emissions_rate)) +
+#     geom_point(color = "gold2", alpha = 0.2, size = 1) +
+#     geom_smooth(color="darkgrey") +
+#     geom_density_2d(color="blue", bins =5, linewidth=0.2)  +
+#     labs(x = "Outside air temperature [°C]", y = "Grid emissions rate [gCO2e/kWh]", caption = "(b)(i)\nBlue lines represent density contours in 5 bins")  +
+#     scale_x_continuous(sec.axis = sec_axis(~ (. -32 )/ 1.8, name = "Outside air temperature [°F]"))
+
+emissions_hr_plot = plot_results |>
+  mutate(hour = factor(hour)) |>
+  filter(building == "180", eq_scen_id == 1) |>
+  ggplot(aes(hour, elec_emissions_rate)) +
+    geom_boxplot(color="#C4820E", outliers = F) +
+    stat_summary(fun=mean, geom="line", aes(group=1), color="#3B7EA1", linewidth=1.5)  + 
+    # stat_summary(fun=mean, geom="point", color="#3B7EA1", shape = 18, size = 4) +
+    # geom_point(color = "gold2", alpha = 0.2, size = 1) +
+    # geom_smooth(color="#5f5e5e", linewidth=1.5) +
+    # geom_density_2d(color="blue", bins =5, linewidth=0.5, linetype=3)  +
+    labs(x = "Hour of day", y = "Grid emissions rate [gCO2e/kWh]")
+
+final_plot = perf_plot + plot_spacer() + emissions_hr_plot +
+    plot_layout(nrow=1, widths = c(1, 0.01, 1)) 
+final_plot
+# ggsave("x.png", final_plot, width = 10, height = 4.5, units = "in")
+```
+
+The NLR Decarbonizing Building Thermal Systems guide briefly discusses heating TES systems and recommends the same sizing strategies as a starting point for designers [@houssainyDecarbonizingBuildingThermal2024a]. It is also important to note that the peak day for TES sizing refers to the day with the largest aggregated total load, which does not always coincide with the day with the largest hourly load. (This is the case for building B, which is why the AWHP does not operate up to maximum capacity in the no-TES peak day plot in @fig-hp_priority).
+
+This paper uses the partial storage sizing strategy for heating loads. While this method results in less load shifting flexibility during high load periods, it is the lowest first-cost scenario because it minimizes heat pump size with the smallest possible tank. Increasing TES capacity beyond this point rapidly escalates first costs as it does not allow any further first cost reduction in heat pump capacity. @fig-sizing represents an example peak day profile. The AWHP capacity is the sum of the peak day loads divided by 24 hours, and the TES capacity is the sum of the positive (or negative) difference between the hourly load and AWHP capacity. For simplicity, we assume constant AWHP capacity for sizing, determined at the lowest outside air temperature on the peak day (capacity varies based on hourly outside air temperature in the subsequent annual simulations). @tbl-equip_sizing lists the calculated equipment sizes. The tank volume is calculated using an 11°C (20°F) hot water ΔT and refers to the usable storage volume, which is dependent on the tank and diffuser geometry and stratification effectiveness and is typically less than the nominal tank volume. Common values for the figure of merit – a metric that incorporates these factors to define the usable volume – range from 80-90% of nominal volume [@glazerjasonASHRAEDesignGuide2019].
+
+```{r fig-sizing}
+#| fig-cap: "System sizing (Building B)"
+#| fig-width: 8
+#| fig-height: 4
+id = "181"
+peak_date = plot_dates |> filter(building == id, season == "Peak Day") |> pull(date)
+ann = ymd_h("2022-12-19 20") # ymd_h("2023-02-27 24") for 180
+
+design_oat = results_all |> filter(building == id, eq_scen_id == 3)|> distinct(design_oat) |> pull(design_oat)
+hp_num = results_all |> filter(building == id, eq_scen_id == 3)|> distinct(hp_num_tes) |> pull(hp_num_tes)
+
+hp_size = hp_num * interp1_zero(awhp_h_curve$oa_t, awhp_h_curve$cap_h, design_oat)
+
+plot_results |>
+  filter(building == id, desc == "No TES", date(datetime) == peak_date) |>
+  mutate(AWHP = hp_size) |>
+  select(datetime, hhw, AWHP) |>
+  ggplot() +
+    geom_line(aes(datetime, hhw/1000, color = "hhw")) +
+    geom_line(aes(datetime, AWHP/1000, color = "AWHP")) +
+    ggh4x::stat_difference(aes(x = datetime, ymin = hhw/1000, ymax = AWHP/1000), alpha=0.1, levels = c("Charging", "Discharging")) +
+    scale_color_manual(values = c("AWHP" = "red", "hhw" = "pink"), labels = c("hhw" = "Heating load")) +
+    labs(y="Load [kW]", x="Hour", fill = "TES", color = "", subtitle = "x") +
+    guides(color = guide_legend(direction = "horizontal"), fill = guide_legend(direction = "horizontal")) +
+    theme(legend.position="top" , #c(1, 1.18)
+        legend.justification="right",
+        legend.background = element_blank(),
+        plot.subtitle = element_text(colour = "#ffffff"),
+        axis.title.y.right = element_text(angle = 90)) +
+    scale_fill_manual(values = c("Charging" = "green", "Discharging" = "orange")) +
+    scale_y_continuous(breaks = seq(0, 500, 100), labels=comma,
+    sec.axis = sec_axis(~ . * 3.412, name = "Load [kBtu/h]", labels=comma)) +
+    scale_x_datetime(date_labels = "%H", date_breaks = "2 hours") +
+    annotate("text", x = ann, y=450, label = "TES = ∑ charging = ∑ discharging")
+```
+
+```{r tbl-equip_sizing}
+#| tbl-cap: "Equipment sizing"
+
+oats = plot_results |> group_by(building, desc) |> distinct(design_oat) |> group_by(building) |> mutate(design_oat = ifelse(is.na(design_oat), min(design_oat, na.rm=T), design_oat)) |> ungroup()
+nums = summary |>
+  select(building, ID, eq_scen_id, desc, AWHP_num, TES_size_Wh = TES_size) |>
+  left_join(select(stats, "Building ID", area_m2 = "Floor area (m²)"), by = c("ID" = "Building ID")) |>
+  filter(eq_scen_id %in% c(2,3)) |>
+  left_join(oats, by = c("building", "desc")) |>
+  mutate(
+    area_m2_rounded = round(area_m2/1000, digits = 1), # round_any(area_m2, 100),
+    area_sf = area_m2 * (3.281)^2,
+    area_sf_rounded = round(area_sf/1000),
+    area_print = str_c(area_m2_rounded, " (", area_sf_rounded, ")"),
+    TES_size_kWh = TES_size_Wh / 1000,
+    TES_size_kWh_rounded = signif(round_any(TES_size_kWh, 1, ceiling), 3),
+    TES_size_kBtu_print = signif(round(TES_size_kWh_rounded * 3.412), 3), 
+    TES_size_print = str_c(TES_size_kWh_rounded, " (", TES_size_kBtu_print, ")"),
+    HHW_dT_F = 20,
+    HHW_dT_C = HHW_dT_F * dF_to_dC,
+    TES_vol_m3 = TES_size_kWh * 3600 / (cp_water * rho_water * HHW_dT_C),
+    TES_vol_m3_rounded = round_any(TES_vol_m3, 1, ceiling),
+    # TES_vol_l = round_any(TES_vol_m3 * 1000, 100, ceiling),
+    TES_vol_1000_gal = round(TES_vol_m3_rounded * m3_to_gal / 1000),
+    TES_vol_print = str_c(TES_vol_m3_rounded, " (", TES_vol_1000_gal, ")"),
+    # TES_size_gal_rounded = round_any(TES_size_gal, 100, ceiling),
+    TES_vol_l_per_area = TES_vol_m3_rounded*1000 / area_m2,
+    TES_vol_gal_per_area = TES_vol_1000_gal * 1000 / area_sf,
+    AWHP_cap_kW = AWHP_num * interp1_zero(awhp_h_curve$oa_t, awhp_h_curve$cap_h, design_oat) / 1000,
+    AWHP_cap_kW_rounded = signif(round_any(AWHP_cap_kW, 1, ceiling), 3),
+    hrs_to_charge = round_any(TES_size_kWh / AWHP_cap_kW, 0.1, ceiling),
+    desc = ifelse(desc == "No TES", "without_TES", "with_TES")
+  )
+
+nums2 = nums |>
+  select(ID, desc, area_print, AWHP_cap_kW_rounded, TES_size_print, TES_vol_print, hrs_to_charge)
+
+TES_sizes = nums2 |>
+  filter(desc == "with_TES") |>
+  select(ID, TES_size_print, TES_vol_print, hrs_to_charge) |>
+  rename("TES capacity, kWh (kBtu)" = TES_size_print, "TES volume, 1,000 l (1,000 gal)" = TES_vol_print, 
+  "Time to fully charge TES by AWHP at max capacity, hrs" = hrs_to_charge
+  )
+
+AWHP_sizes = nums2 |>
+  select(ID, area_print, desc, AWHP_cap_kW_rounded) |>
+  pivot_wider(names_from = desc, values_from = AWHP_cap_kW_rounded) |>
+  mutate(reduction = str_c(round_any(100*(without_TES - with_TES)/without_TES, 1), "%")) |>
+  mutate(without_kbtuh = signif(round(without_TES * 3.412), 3), with_kbtuh = signif(round(with_TES*3.412), 3)) |>
+  mutate(
+    combined_without = str_c(without_TES, " (", without_kbtuh, ")"),
+    combined_with = str_c(with_TES, " (", with_kbtuh, ")")
+  ) |>
+  select(ID, "Floor area, 1,000 m² (1,000 ft²)" = area_print, "AWHP capacity without TES, kW (kBtu/h)" = combined_without, "AWHP capacity with TES, kW (kBtu/h)" = combined_with, "AWHP capacity reduction" = reduction)
+
+final_sizes = left_join(AWHP_sizes, TES_sizes, by = "ID") |> rename("Building ID" = ID)
+flextable(final_sizes)
+# final_sizes
+```
+
+## Control Strategies
+
+**Control strategy 1: AWHP Priority.** The first control strategy modeled is a typical “chiller-priority” load leveling strategy, where the heat pump is operated up to its maximum capacity and the tank discharges to meet any loads in excess of this capacity [@ashraeHandbook2024]. The TES is not intentionally leveraged to reduce energy or emissions through load shifting; the plant solely uses it to meet loads with a smaller heat pump. We assume the tank is fully charged at the beginning of the year. @fig-hp_priority illustrates this for building B, showing the operating profiles for the tank state of charge and AWHP load on the peak heating day plus one representative day from the heating and cooling seasons. The profiles for a scenario with no TES (load is served fully by AWHPs) are included for comparison, and the annotations refer to the percentage difference in electricity use emissions from heating equipment (in this case, the AWHP) from the corresponding no-TES case on that day.
+
+```{r fig-hp_priority}
+#| fig-cap: "Control strategy 1: AWHP Priority (Building B)"
+#| fig-width: 8
+#| fig-height: 4
+
+id = "181"
+peak_date = plot_dates |> filter(building == id, season == "Peak Day") |> pull(date)
+
+dat = plot_results |> 
+  filter(building == id, eq_scen_id %in% c(2,3)) |>
+  mutate(season = ifelse(date == peak_date, "Peak Day", season),
+        quarter = ifelse(date == peak_date, 0, quarter)) |>
+  filter(date %in% filter(plot_dates, building == id)$date) |>
+  mutate(print_date = str_c(month(date, label = T), " ", day(date))) |>
+  mutate(season_date = str_c(season, " (", print_date, ")")) |>
+  filter(quarter %in% c(0,1,3))
+
+plot_dates_emissions = dat |>
+  filter(date %in% plot_dates$date) |>
+  summarize(elec_emissions = sum(elec_h_emissions), .by = c(building, eq_scen_id, desc, date, quarter))
+
+plot_dates_baseline_emissions = plot_dates_emissions |>
+  filter(desc == "No TES") |>
+  rename(elec_emissions_base = elec_emissions) |>
+  select(building, date, elec_emissions_base)
+
+plot_dates_emissions = plot_dates_emissions |>
+  filter(desc != "No TES") |>
+  left_join(plot_dates_baseline_emissions, by = c("building", "date")) |>
+  mutate(elec_emissions_diff = 100*(elec_emissions - elec_emissions_base)/elec_emissions_base,
+  building = as.double(building)) |>
+  filter(abs(elec_emissions_diff) > 1e-1) |>
+  inner_join(plot_dates, by = c("building", "date")) |>
+  mutate(x = force_tz(ymd_h(str_c(as.character(date), " 11 PM")), "US/Pacific"), y = 1100) |>
+  mutate(print_date = str_c(month(date, label = T), " ", day(date))) |>
+  mutate(season_date = str_c(season, " (", print_date, ")"))
+
+dat |>
+  pivot_longer(
+    cols = c(TES_charge, awhp_hhw), # TES_load),
+    names_to = "equipment",
+    values_to = "load") |>
+  mutate(load = load/1000) |>
+  mutate(equipment = case_when(
+    equipment == "awhp_hhw" ~ "AWHP",
+    equipment == "TES_charge" ~ "TES charge"
+    )) |>
+  ggplot() +
+    geom_line(aes(datetime, load, color = equipment)) +
+    geom_line(aes(datetime, awhp_cap_h_total/1000, color="awhp_cap_h_total"), linetype=2) +
+    geom_text(data = plot_dates_emissions,
+        aes(x, y, label = str_c(percent(elec_emissions_diff/100, accuracy=0.1, style_positive = "plus"), " emissions \nfrom no TES")), vjust = 2, hjust = 1, size=3) +
+    labs(x = "Hour", y = "Load [kW]", color = "", fill = "", shape = "", subtitle = str_c("Building #", id)) +
+    scale_color_manual(values = c("TES charge" = "orange", "AWHP" = "red", "awhp_cap_h_total" = "red"), labels = c("awhp_cap_h_total" = "Max AWHP capacity")) +
+    scale_x_datetime(date_labels = "%H") +
+    facet_grid(reorder(desc, eq_scen_id) ~ reorder(season_date, quarter), scales = "free_x") +
+    guides(color = guide_legend(direction = "horizontal")) +
+    theme(legend.position=c(1, 1.11),
+        legend.justification="right",
+        legend.background = element_blank(),
+        plot.subtitle = element_text(colour = "#ffffff"),
+        axis.title.y.right = element_text(angle = 90)) +
+    scale_y_continuous(labels=comma, sec.axis = sec_axis(~ . * 3.412, name = "Load [kBtu/h]", labels=comma))
+```
+
+```{r awhp_strat_1, include = FALSE}
+id = "181"
+hrs_over_cap = plot_results |>
+  filter(building == id, eq_scen_id == 3) |>
+  mutate(hhw_over_cap = hhw > awhp_cap_h_total) |>
+  summarize(hrs_over_cap = sum(hhw_over_cap), hrs_total = n(), .by = building) |>
+  mutate(hrs_over_cap_percent = 100*hrs_over_cap/hrs_total) |>
+  pull(hrs_over_cap_percent)
+hrs_over_cap = round(hrs_over_cap, digits = 1)
+
+utilization_1 = plot_results |>
+  filter(building == id, eq_scen_id == 3) |>
+  summarize(utilized_hrs = sum(TES_load>0 | TES_charge==0), unutilized_hrs = sum(TES_load==0 & TES_charge!=0)) |>
+  mutate(total_hrs = utilized_hrs + unutilized_hrs,
+    utilization = 100*utilized_hrs/total_hrs)
+utilization_1 = round(utilization_1$utilization, digits = 1)
+
+emissions_savings_1 = summary |>
+  filter(building == id, eq_scen_id == 3) |>
+  pull(elec_h_emissions_diff)
+emissions_savings_1 = round(emissions_savings_1, digits = 1)
+```
+
+This load leveling strategy results in a total of `r -emissions_savings_1`% savings in annual heating equipment electricity use emissions for this building. We can observe that the AWHP operation is largely unchanged between the two cases: the heating load exceeds the AWHP capacity, thus requiring the tank to discharge, for only `r hrs_over_cap`% of hours. In the laboratory buildings in the dataset with “smoother” peak day profiles (i.e. there is a smaller variation between the peak day’s minimum and maximum load, so the AWHP is larger in proportion to the peak load) this percentage – and thus the emissions savings – is even lower. These findings align with our understanding of HHW load distributions being highly skewed toward low part loads.
+ 
+```{r awhp_strat_2, include = FALSE}
+id = "181"
+
+design_oat = results_all |> filter(building == id, eq_scen_id == 8)|> distinct(design_oat) |> pull(design_oat)
+design_oat_f = round(C_to_f(design_oat))
+oat_lim_lo = design_oat+2
+oat_lim_hi = design_oat+6
+oat_lim_lo_f = round(C_to_f(oat_lim_lo))
+oat_lim_hi_f = round(C_to_f(oat_lim_hi))
+
+utilization_2 = plot_results |>
+  filter(building == id, eq_scen_id == 8) |>
+  summarize(utilized_hrs = sum(TES_load>0 | TES_charge==0), unutilized_hrs = sum(TES_load==0 & TES_charge!=0)) |>
+  mutate(total_hrs = utilized_hrs + unutilized_hrs,
+    utilization = 100*utilized_hrs/total_hrs)
+utilization_2 = round(utilization_2$utilization, digits = 1)
+
+emissions_savings_2 = summary |>
+  filter(building == id, eq_scen_id == 8) |>
+  pull(elec_h_emissions_diff)
+emissions_savings_2 = round(emissions_savings_2, digits = 1)
+```
+
+**Control strategy 2: Fixed On-Peak Discharging.** In order to benefit from the load shifting potential of thermal energy storage, a “storage-priority” control strategy must be employed in which the tank is intentionally discharged in lieu of operating the heat pump, when feasible to do so while still meeting building loads. A basic implementation of this is to define a daily on-peak period (i.e., peak grid emissions rate) during which the TES takes priority over the AWHP to serve any loads. Control strategy 2 accordingly uses the previous day’s emissions rate profile to select a 4-hour on-peak period with the highest total emissions rate at the start of each day. The green and unshaded regions in @fig-control_two highlight the hours in which the AWHP and TES are prioritized, respectively.
+
+To prevent the tank from discharging prematurely before high load conditions and the AWHP subsequently having insufficient capacity to serve loads alone, we include an override to the above logic based on outside air temperature (OAT). This override resets a minimum tank charge setpoint at limits defined as the peak day OAT plus 2°C and 6°C, e.g. for building B with a peak day OAT of `r design_oat`°C (`r design_oat_f`°F), the minimum tank charge is reset between 100% at `r oat_lim_lo`°C (`r oat_lim_lo_f`°F) and 0% at `r oat_lim_hi`°C (`r oat_lim_hi_f`°F). If the on-peak-hour control strategy would result in the tank charge dropping below the OAT-based minimum, the heat pump is enabled regardless of priority, shown shaded blue in @fig-control_two. This ensures the tank retains enough capacity required for load leveling on colder days when instantaneous heating loads exceed the AWHP capacity.
+
+There is a clear benefit to consistently discharging the tank each day. The percentage of hours in the year in which the tank is used (i.e. discharged to meet loads) increases to `r utilization_2`%, which results in `r -emissions_savings_2`% savings in annual heating electricity use emissions. However, because this strategy is blind to the actual daily conditioning requirements, there are many instances where the tank is underutilized, such as in the September day operation in @fig-control_two. Some information about the upcoming load profile must be incorporated to effectively enhance the tank’s operation.
+
+```{r awhp_strat_3, include = FALSE}
+id = "181"
+
+utilization_3 = plot_results |>
+  filter(building == id, eq_scen_id == 13) |>
+  summarize(utilized_hrs = sum(TES_load>0 | TES_charge==0), unutilized_hrs = sum(TES_load==0 & TES_charge!=0)) |>
+  mutate(total_hrs = utilized_hrs + unutilized_hrs,
+    utilization = 100*utilized_hrs/total_hrs)
+utilization_3 = round(utilization_3$utilization, digits = 1)
+
+emissions_savings_3 = summary |>
+  filter(building == id, eq_scen_id == 13) |>
+  pull(elec_h_emissions_diff)
+emissions_savings_3 = round(emissions_savings_3, digits = 1)
+```
+
+```{r fig-control_two}
+#| fig-cap: "Control strategies 2 and 3: Fixed On-Peak Charging and Calculated Off-Peak Charging"
+#| fig-width: 8
+#| fig-height: 6
+
+id = "181"
+peak_date = plot_dates |> filter(building == id, season == "Peak Day") |> pull(date)
+
+dat = plot_results |> 
+  filter(building == id, eq_scen_id %in% c(2,8,13)) |>
+  mutate(season = ifelse(date == peak_date, "Peak Day", season),
+        quarter = ifelse(date == peak_date, 0, quarter)) |>
+  filter(date %in% filter(plot_dates, building == id)$date) |>
+  mutate(print_date = str_c(month(date, label = T), " ", day(date))) |>
+  mutate(season_date = str_c(season, " (", print_date, ")")) |>
+  filter(quarter %in% c(0,1,3)) 
+
+plot_dates_emissions = dat |>
+  filter(date %in% plot_dates$date) |>
+  summarize(elec_emissions = sum(elec_h_emissions), .by = c(building, eq_scen_id, desc, date, quarter))
+
+plot_dates_baseline_emissions = plot_dates_emissions |>
+  filter(desc == "No TES") |>
+  rename(elec_emissions_base = elec_emissions) |>
+  select(building, date, elec_emissions_base)
+
+plot_dates_emissions = plot_dates_emissions |>
+  filter(desc != "No TES") |>
+  left_join(plot_dates_baseline_emissions, by = c("building", "date")) |>
+  mutate(elec_emissions_diff = 100*(elec_emissions - elec_emissions_base)/elec_emissions_base,
+  building = as.double(building)) |>
+  filter(abs(elec_emissions_diff) > 1e-1) |>
+  inner_join(plot_dates, by = c("building", "date")) |>
+  mutate(x = force_tz(ymd_h(str_c(as.character(date), " 11 PM")), "US/Pacific"), y = 1100) |>
+  mutate(season_date = str_c(season, " (", date, ")")) |>
+  mutate(print_date = str_c(month(date, label = T), " ", day(date))) |>
+  mutate(season_date = str_c(season, " (", print_date, ")"))
+
+# emissions_plot = dat |>
+#   ggplot() +
+#     geom_line(aes(datetime, elec_emissions_rate, color="Emissions Rate"), linetype = 2) +
+#     labs(x = "", y = "[kgC02e/kWh]", color="", ) + # , subtitle = str_c("Building #", id)
+#     scale_x_datetime(labels = NULL) +
+#     scale_color_manual(values = c("Emissions Rate" = "gray")) +
+#     facet_grid(. ~ reorder(season_date, quarter), scales = "free_x") +
+#     theme(axis.ticks.x = element_blank(),
+#       legend.position=c(0.1, 1.78),
+#       legend.justification="left",
+#       legend.background = element_blank())
+
+hp_on_ctrl = dat |>
+    group_by(desc, eq_scen_id) |>
+    mutate(on = operate_hp_tes, group = cumsum(on != lag(on, default = FALSE))) |>
+    filter(on == TRUE) |>
+    group_by(desc, eq_scen_id, season_date, quarter, group) |>
+    summarize(xmin = min(datetime), xmax = max(datetime)+hours(1))
+
+hp_on_oat = dat |>
+  group_by(desc, eq_scen_id) |>
+  mutate(on = (!(operate_hp_tes) & hp_tes != 0), group = cumsum(on != lag(on, default = FALSE))) |>
+  filter(on == TRUE) |>
+  group_by(desc, eq_scen_id, season_date, quarter, group) |>
+  summarize(xmin = min(datetime), xmax = max(datetime)+hours(1))
+
+loads_plot = dat |>
+  pivot_longer(
+    cols = c(TES_charge, awhp_hhw), # TES_load),
+    names_to = "equipment",
+    values_to = "load") |>
+  mutate(load = load/1000) |>
+  mutate(equipment = case_when(
+    equipment == "awhp_hhw" ~ "AWHP",
+    equipment == "TES_charge" ~ "TES charge"
+    )) |>
+  ggplot() +
+    geom_line(aes(datetime, load, color = equipment)) +
+    geom_line(aes(datetime, awhp_cap_h_total/1000, color="awhp_cap_h_total"), linetype=2) +
+    geom_text(data = plot_dates_emissions,
+        aes(x, y, label = str_c(percent(elec_emissions_diff/100, accuracy=0.1, style_positive = "plus"), " emissions\nfrom no TES")), vjust = 2, hjust = 1, size=3) +
+    geom_rect(data = hp_on_ctrl, aes(xmin=xmin, xmax=xmax, ymin=0, ymax=Inf, fill="HP Priority (Calc. Hrs)"), alpha=0.1) +
+    geom_rect(data = hp_on_oat, aes(xmin=xmin, xmax=xmax, ymin=0, ymax=Inf, fill="HP Enabled (OAT Min.)"), alpha=0.1) +
+    labs(x = "Hour", y = "Load [kW]", color = NULL, fill = NULL) +
+    scale_color_manual(values = c("TES charge" = "orange", "AWHP" = "red", "awhp_cap_h_total" = "red"), labels = c("awhp_cap_h_total" = "Max AWHP capacity")) +
+    scale_fill_manual(values = c("HP Priority (Calc. Hrs)" = "green", "HP Enabled (OAT Min.)" = "#009be8")) +
+    scale_x_datetime(date_labels = "%H") +
+    facet_grid(reorder(desc, eq_scen_id) ~ reorder(season_date, quarter), scales = "free_x") +
+    guides(color = guide_legend(direction = "horizontal"), fill = guide_legend(direction = "horizontal")) +
+    theme(legend.position= "top",
+        legend.justification="right",
+        legend.background = element_blank(),
+        # strip.text.x = element_blank(),
+        axis.title.y.right = element_text(angle = 90)) +
+    scale_y_continuous(labels=comma, sec.axis = sec_axis(~ . * 3.412, name = "Load [kBtu/h]", labels=comma))
+
+# legend = get_legend(loads_plot)
+# legend_wrapped = wrap_elements(full = legend)
+# loads_plot = loads_plot + theme(legend.position = "none")
+
+# final_plot = legend_wrapped + emissions_plot + plot_spacer() + loads_plot +
+#     plot_layout(ncol=1, heights = c(0.1, 1, -0.6, 6))
+# final_plot
+loads_plot
+```
+
+**Control strategy 3: Calculated Off-Peak Charging.** Instead of defining a period in which the AWHP is not preferred to operate, the final modeled strategy determines the minimum and grid optimal period to operate the heat pump that ensures sufficient storage capacity for the rest of the day. At the start of each day, we calculate the number of hours the AWHP needs to operate at maximum capacity to meet the sum of the previous day’s loads. We define an “off-peak” period of this calculated number of hours with the lowest total grid emissions rate and prioritize the AWHP during this period only unless overridden by the OAT reset. This allows the AWHP operation to be limited to the minimum period required to serve loads, during the most favourable grid conditions, and is a strong improvement over the previous control strategies with `r utilization_3`% annual tank utilization and `r -emissions_savings_3`% annual heating emissions savings.
+
+## Limitations
+
+For the purposes of this analysis, we assume the existing measured loads are unchanged, but it is important to note that various load reduction or smoothing measures such as ramped morning warmup or supply air temperature reset can greatly reduce heating energy consumption in buildings [@chengHotWaterHeating2024] and should be considered first, prior to sizing plant equipment. Additionally, we assumed no standby losses from the tank and did not model short-cycling effects for the heat pumps or auxiliary system components such as pumps and terminal units in the annual simulations. As a result, the reported emissions savings may be overstated, particularly for the larger tank sizes.
+
+For control strategy 3, using the previous day's loads to determine the AWHP operating periods is an estimation and results in some under- and over-utilization of the TES because it does not account for unoccupied days or sudden changes in weather. However, this approximation keeps the proposed controls straightforward to implement in a building automation system. While forecasting models may be more accurate, they are computationally heavy, cost-intensive to implement, and industry adoption is low [@killianTenQuestionsConcerning2016; @kimSiteDemonstrationPerformance2022].
+
+# Results and Discussion
+
+```{r fig-awhp_tot_emissions}
+#| fig-cap: "Heating electricity use emissions compared to no-TES scenario"
+#| fig-width: 8
+#| fig-height: 4
+ann_awhp = select(AWHP_sizes, ID, red = `AWHP capacity reduction`) |>
+  mutate(red = as.numeric(str_extract(red, ".*(?=%)"))) |>
+  mutate(red = round(red)) |>
+  mutate(red = str_c(as.character(red), "%")) |>
+  mutate(tag = str_c("Building ", ID), fac_label = str_c(tag, "\nMax AWHP size reduction: ", red))
+
+summary |>
+  left_join(ann_awhp, by = "ID") |>
+  filter(!(desc %in% c("No TES", "BaselineGas"))) |>
+  mutate(sizing_plot = case_when(
+    tes_sizing == "Partial" ~ 1,
+    tes_sizing == "2x Partial" ~ 2,
+    tes_sizing == "3x Partial" ~ 3,
+    tes_sizing == "4x Partial" ~ 4,
+    tes_sizing == "5x Partial" ~ 5,
+  )) |>
+  ggplot(aes(sizing_plot, elec_h_emissions_diff, color = tes_legend)) +
+    geom_line() +
+    geom_point(shape = 18) +
+    labs(y="Percent difference in annual heating emissions", x = "Tank sizing factor", color = "") +
+    scale_y_continuous(limits=c(-50,0), breaks = seq(-50, 0, 10), labels = percent(seq(-0.5,0,0.1))) +
+    scale_x_continuous(labels = c("1x", "2x", "3x", "4x", "5x")) +
+    theme(legend.position="top") +
+    scale_color_manual(values = c("#b0750c", "#3b7ea1", "#D9661F")) +
+    # facet_grid(fac_label ~ .)
+    facet_wrap(~ fac_label) 
+```
+
+@fig-awhp_tot_emissions shows a comparison of annual heating emissions savings for each building and control strategy across a range of TES capacities, where 1x represents the original sizing calculated in @tbl-equip_sizing, 2x corresponds to double that capacity, and so on. While the results invariably show a reduction in operational emissions from the no-TES scenario, the magnitude of this reduction is closely tied to the equipment sizing, which varies substantially based on the building load profile. As previously discussed, buildings with a larger peak day load range have proportionally smaller AWHPs. This in turn results in proportionally larger tank sizes, indicated by the time to full charge listed in @tbl-equip_sizing. Buildings E and F both have the smallest relative tank size (1.2 hours to full charge) and comparatively consistent daily heating loads (@fig-dataset_szn). The combination of these factors means the TES regularly discharges to zero during unfavorable emissions conditions and would benefit from upsizing, as @fig-awhp_tot_emissions demonstrates. However, since the AWHPs are sized for the smallest possible capacity to meet peak day loads, increasing the TES volume does not further offset their first cost. In contrast, building A and B’s oversized tanks along with their highly seasonal heating loads signifies that while the load shifting potential is being leveraged well, there is opportunity to reduce the tank size without heavily affecting emissions savings. For all cases, we observe diminishing returns in terms of emissions savings from increased storage capacity. A sensitivity analysis in this manner can help quickly identify the threshold at which the cost of additional TES volume outweighs its emissions (or energy, or operational cost) benefits.
+
+Defining the appropriate cost signal for any given application is essential as its characteristics have a significant impact on the load shifting operation. The grid emissions rate in California varies considerably over the course of a day, whereas outside air temperature variation is low. In other climates and grid regions, the the OAT-based equipment efficiency variation may contribute more to emissions savings than the grid emissions factors, and optimizing for energy use may be more suitable. For this analysis optimizing for emissions, the difference in annual energy use from no-TES to TES is below 2% for nearly all cases. The same cost signal will also have varying effects based on the tank configuration – for instance, in California where grid emissions are lowest in the daytime, a HHW tank allows better equipment efficiency by operating in those hours, whereas a CHW tank would mean operating the AWHP at lower efficiencies. The opposite would hold true if optimizing for cost, since utility costs generally peak in the late afternoon and early evening. A system analysis using utility costs should carefully verify the input assumptions, as cost savings are similarly contingent on utility rate structure and rate schedules can periodically change in certain regions [@weigelTechnicalEvaluationAirtoWater2025]. 
+
+While the analysis presented here covers HHW tanks, these control strategies can be adopted for CHW systems without extensive adjustments. We assumed heating-driven sizing, but a CHW tank is better suited for a cooling-dominant building where AWHPs are the only equipment serving cooling loads and thus sized for cooling. Seasonal switchover to allow operation on both loops would maximize load shifting potential. For a CHW tank system served by a variable-speed chiller, it would be beneficial to vary the charging rate to allow the chiller to operate at lower part-loads and thus higher efficiency. If optimizing for utility cost instead of energy use or emissions, such a strategy would also help reduce peak demand charges. Maintaining lower part loads is less beneficial for modular heat pump equipment with limited turndown capacity.
+
+TES systems have several additional benefits. Hot water TES in particular can be designed with independent control of supply water temperature and tank storage temperature by using a secondary mixing strategy, which allows for a dynamic upward reset of the tank storage temperature based on predicted future load. This is limited only by the capabilities of the heat pump and durability and heat loss of the tank material and effectively increases the thermal storage capacity by creating a larger ΔT. Modular heat pump plants typically include buffer tanks to meet manufacturers’ minimum system volume requirements that help reduce short-cycling [@cervera-vazquezSizingBufferTank2016]; a TES tank can serve this purpose as well. TES is also well-established as a demand response strategy [@glazerjasonASHRAEDesignGuide2019] which can be incorporated into an existing control methodology. Lastly, further research is needed on the heat recovery application of TES – shifting daily load profiles to create more simultaneous load, capturing a larger fraction of potential heat recovery. This has been shown to reduce energy consumption and improve equipment efficiency [@gillSolvingLargeBuilding2021; @ElectrifyingLarge2026].
+
+```{r gas_to_elec, include = FALSE}
+gas = summary |>
+  filter(desc == "BaselineGas") |>
+  select(building, gas_emissions)
+
+electrification = summary |>
+  filter(eq_scen_id != 1) |>
+  filter(eq_scen_id == 2 | (tes_sizing %in% c("Partial", "5x Partial") & tes_control_id == 3)) |>
+  select(building, eq_scen_id, tes_sizing, desc, tot_emissions, elec_emissions, elec_h_emissions) |>
+  left_join(gas, by = "building") |>
+  mutate(diff = 100*(elec_h_emissions - gas_emissions)/gas_emissions) |>
+  mutate(desc = case_when(
+    eq_scen_id == 2 ~ "AWHP only",
+    tes_sizing == "Partial" ~ "AWHP + 1x tank",
+    tes_sizing == "5x Partial" ~ "AWHP + 5x tank"
+  )) |>
+  group_by(building) |>
+  mutate(order = seq_along(desc)) |>
+  mutate(diff_inter = lag(diff), diff_cumulative = diff - diff_inter) |>
+  mutate(diff_cumulative = ifelse(is.na(diff_cumulative), diff, diff_cumulative)) |>
+  ungroup() |>
+  select(building, desc, diff, diff_cumulative, order)
+
+# minmax = summary |>
+#   filter(tes_sizing %in% c("Partial", "5x Partial"), tes_control_id == 3) |>
+#   mutate(desc = case_when(
+#     tes_sizing == "Partial" ~ "AWHP + 1x tank",
+#     tes_sizing == "5x Partial" ~ "AWHP + 5x tank"
+#   )) |>
+#   mutate(order = case_when(
+#     tes_sizing == "Partial" ~ 2,
+#     tes_sizing == "5x Partial" ~ 3
+#   )) |>
+#   select(building, desc, diff=elec_h_emissions_diff, order)
+
+# minmax
+# electrification
+```
+
+# Conclusion
+
+This study presents a framework for evaluating AWHP systems with heating hot water thermal energy storage. We used real-world measured building load data to quantify the extent to which the addition of TES can minimize installed heat pump capacity and help avoid the substantial first costs associated with that capacity. By modeling various control strategies with relatively simple rule-based control logic to maximize on load shifting potential, we demonstrate up to 15% reduction in annual heating electricity use emissions using the minimum tank size for load leveling compared to a design without storage. A key takeaway is an understanding of how the variation in building load profile significantly impacts sizing strategy outcomes, and how the sizing outcomes affect load shifting operation. Additional emissions savings (up to 49%) are achievable by increasing the TES volume for buildings with suitable load profiles, but this intensifies first costs as it is not accompanied by further reductions in AWHP capacity. Some of these savings can be captured by implementing a tank storage temperature reset to increase ΔT when the heat pump is able to produce higher supply water temperatures. The emissions impact of increasing tank capacity should not be underestimated – in comparison, the emissions reduction achieved by electrifying the heating system from an 80% efficient gas boiler to full AWHP (without TES) ranges from 53-62% for the analyzed buildings. These findings provide valuable insights for TES-AWHP system design and operation, a system type that will only become more worthwhile as building heating systems are electrified and increase demand on the electric grid.
+
+# Acknowledgements {.unnumbered}
+The California Energy Commission (grant #EPC-23-023) and the Center for the Built Environment at the University of California, Berkeley supported this research.
+
+# References {#references .unnumbered}
+

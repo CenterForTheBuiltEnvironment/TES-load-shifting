@@ -1,0 +1,160 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r end_charge, include = FALSE}
+# buildings where end charge is less than start charge
+# results_all |>
+#   group_by(building, desc) |>
+#   filter(!(desc %in% c("BaselineGas", "No TES"))) |>
+#   filter(TES_charge[n()] < TES_charge[1]) |>
+#   distinct(building, desc)
+```
+
+```{r check_design_oats, include = FALSE, eval = FALSE}
+results_all |> 
+  filter(eq_scen_id == 8) |>
+  group_by(building) |>
+  distinct(design_oat) |>
+  mutate(ashrae_99_6 = 4.7, ashrae_99 = 5.8) # for SAN FRANCISCO INTL, CA, USA (WMO: 724940)
+
+results_all |> 
+  filter(eq_scen_id == 8) |>
+  group_by(building) |>
+  summarise(min_oat = min(oa_t))
+```
+
+```{r oat_reset_hrs, include = FALSE, eval = FALSE}
+results_all |>
+  filter(eq_scen_id == 3) |>
+  # group_by(building) |>
+  mutate(oat_override = (!(operate_hp_tes) & hp_tes != 0)) |>
+  summarize(hrs_oat_override = sum(oat_override), hrs_total = n(), .by = building) |>
+  mutate(hrs_oat_override_percent = 100*hrs_oat_override/hrs_total)
+```
+
+```{r over_max, include = FALSE, eval = FALSE}
+over_max = results_all |>
+  group_by(building, eq_scen_id, tes_sizing, tes_control_id, desc) |>
+  mutate(over = awhp_hhw - awhp_cap_h_total > 1e-3, ok = !over) |>
+  summarize(tot_over = sum(over), tot_ok = sum(ok)) |>
+  filter(tot_over > 0) |>
+  mutate(plot = 20)
+
+print(over_max, n = Inf)
+```
+
+```{r dominant_load, include = FALSE, eval = FALSE}
+df |>
+  group_by(building) |>
+  summarize(total_hhw = sum(hhw), total_chw = sum(chw), peak_hhw = max(hhw), peak_chw = max(chw)) |>
+  mutate(ratio_sums = total_hhw/total_chw, ratio_peaks = peak_hhw/peak_chw, ratio_peaks_chw = peak_chw/peak_hhw)
+```
+
+```{r reduction_2x_180, include = FALSE, eval = FALSE}
+r_180_par = results_all |> filter(building == "180", eq_scen_id == 12) |> select(datetime, og_em = elec_h_emissions)
+r_180_2xpar = results_all |> filter(building == "180", eq_scen_id == 13) |> 
+  select(datetime, elec_h_emissions) |> 
+  left_join(r_180_par, by = c("datetime")) |>
+  mutate(diff = elec_h_emissions - og_em) |>
+  filter(diff > 1)
+r_180_2xpar
+# tot_elec = results_all |>
+#   filter(building == "180", eq_scen_id %in% c(4,5)) |>
+#   group_by(desc) |>
+#   summarize(tot_awhp_elec = sum(elec_awhp_h))
+# same hhw but more elec usage in 2x. why?
+
+# results_all |>
+#   filter(building == "180", eq_scen_id %in% c(4,5)) |>
+#   mutate(hour = hour(datetime)) |>
+#   mutate(hr_grp = ifelse(hour %in% c(12,13,14,15,16,17,18), "hot", "cold")) |>
+#   group_by(desc, hr_grp) |>
+#   summarize(tot_awhp_elec_hr = sum(elec_awhp_h)) |>
+#   left_join(tot_elec, by = "desc") |>
+#   mutate(percent_elec_hr = tot_awhp_elec_hr/tot_awhp_elec) |>
+#   ggplot() +
+#     geom_col(aes(hr_grp, percent_elec_hr)) +
+#     geom_text(aes(hr_grp, percent_elec_hr, label = percent(percent_elec_hr, accuracy = 0.1)), vjust=-0.4) +
+#     facet_grid(. ~ desc)
+```
+
+```{r analysis, include = FALSE, eval = FALSE}
+id = c("180", "205")
+scen = c(4, 5)
+bldg_results = results_all |> 
+  # filter(building %in% id) |>
+  filter(eq_scen_id %in% scen)
+# bldg_results |>
+#   pivot_longer(
+#     cols = c(elec_awhp_h, TES_charge),
+#     names_to = "meter",
+#     values_to = "value"
+#   ) |>
+#   ggplot(aes(datetime, value, color=meter)) +
+#   geom_line() +
+#   facet_grid(eq_scen_id ~ building)
+
+max_hhw = bldg_results |>
+  group_by(building, desc) |>
+  summarize(max_hhw = max(hhw), TES_size = max(TES_charge))
+test = bldg_results |>
+  left_join(max_hhw, by = c("building", "desc")) |>
+  mutate(hhw_percent_tes = hhw/TES_size) |>
+  ggplot(aes(x = hhw_percent_tes)) +
+    geom_histogram(fill='orange', binwidth = 0.05) +
+    labs(title = "HHW load percentage of TES (load/TES)") +
+    facet_grid(building ~ desc)
+
+# tes_sizes = summary |> select(building, eq_scen_id, TES_size)
+# bldg_results |>
+#   left_join(tes_sizes, by = c("building", "eq_scen_id")) |>
+#   mutate(load_tes_ratio = hhw/TES_size) |>
+#   # select(datetime, hhw, TES_size, load_tes_ratio)
+#   ggplot(aes(x = load_tes_ratio)) +
+#     geom_histogram(fill='orange') +
+#     labs(title = "HHW load / TES size") +
+#     facet_grid(building ~ .)
+```
+
+```{r testing, include = FALSE, eval = FALSE}
+# sum(filtered_results$gas_emissions)
+
+write_csv_localtime = function(df, path, tz = "US/Pacific") {
+    df_out = df |> mutate(datetime = format(with_tz(datetime, tz), "%Y-%m-%d %H:%M:%S"))
+    write_csv(df_out, path)
+}
+write_csv_localtime(results_all, "results_all.csv")
+```
+
+```{r partial2full, include = FALSE, eval = FALSE}
+partials = summary |>
+  filter(eq_scen_id == 4) |>
+  select(building, partial_size = TES_size)
+
+fulls = summary |>
+  filter(eq_scen_id == 5) |>
+  select(building, tes_sizing, TES_size) |>
+  left_join(partials, by = c("building")) |>
+  mutate(full_diff = 100*(TES_size- partial_size)/partial_size)
+fulls
+```
+
+```{r short_cycling, include = FALSE, eval = FALSE}
+max_cap = max(awhp_h_curve$cap_h)
+max_cap * 3.412 / 12000 # in tons
+min_cap = max_cap / 2 # assuming 2 compressors
+
+print(
+  results_all |>
+    filter(eq_scen_id  %in% c(2, 3, 8, 13)) |>
+    mutate(awhp_below_turndown = awhp_hhw < min_cap) |>
+    group_by(building, desc) |>
+    summarise(hrs_below_turndown = sum(awhp_below_turndown), total_hrs = n()) |>
+    mutate(hrs_below_turndown_percent = hrs_below_turndown/total_hrs),
+  n = Inf
+)
+```
+
+xx
