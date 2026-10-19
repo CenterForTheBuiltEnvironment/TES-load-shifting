@@ -1,7 +1,6 @@
 library(tidyverse)
 library(lubridate)
-
-#! pass peak hr period
+library(slider)
 
 update_TES_charge = function(hp, load, prev_charge, TES_size){
   available_delta = hp - load

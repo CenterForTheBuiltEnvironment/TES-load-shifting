@@ -5,14 +5,14 @@ library(janitor)
 # Read in data, misc initial prep/cleaning tasks
 
 # tables of relevant information
-bldgs <- "data/bldg.csv" %>% read_csv(skip=3)  |> mutate(bldg_id = as.character(bldg_id))
-refrigs <- "data/refrigs.csv" %>% read_csv(skip=3)
-awhps <- "data/awhps.csv" %>% read_csv(skip=3)
-hr_wwhps <- "data/hr_wwhps.csv" %>% read_csv(skip=3)
-boilers <- "data/boilers.csv" %>% read_csv(skip=3)
-awhp_curves <- "data/awhp_curves.csv" %>% read_csv(skip=3)
-hr_wwhp_curves <- "data/hr_wwhp_curves.csv" %>% read_csv(skip=3)
-plot_dates <- "data/loads/plot_dates.csv" %>% read_csv(skip=3) |> mutate(date = dmy(date))
+bldgs <- "../data/bldg.csv" %>% read_csv(skip=3)  |> mutate(bldg_id = as.character(bldg_id))
+refrigs <- "../data/refrigs.csv" %>% read_csv(skip=3)
+awhps <- "../data/awhps.csv" %>% read_csv(skip=3)
+hr_wwhps <- "../data/hr_wwhps.csv" %>% read_csv(skip=3)
+boilers <- "../data/boilers.csv" %>% read_csv(skip=3)
+awhp_curves <- "../data/awhp_curves.csv" %>% read_csv(skip=3)
+hr_wwhp_curves <- "../data/hr_wwhp_curves.csv" %>% read_csv(skip=3)
+plot_dates <- "../data/loads/plot_dates.csv" %>% read_csv(skip=3) |> mutate(date = dmy(date))
 
 awhp_curves %<>%
   mutate(oa_t = ifelse(unit_system == "IP",F_to_C(oa_t),oa_t),
@@ -29,7 +29,7 @@ hr_wwhp_curves%<>%
   mutate(cap_h = ifelse(unit_system == "IP",BTUh_to_W*cap_h,cap_h))
 
 # load in elec emissions rates
-grid_scenarios = readRDS("data/grid_scenarios.rds")
+grid_scenarios = readRDS("../data/grid_scenarios.rds")
 # if needed, extract updated information from the latest cambium data
 # available from: https://scenarioviewer.nrel.gov/
 # download month-hour average data for all GEA regions
@@ -39,7 +39,7 @@ grid_scenarios = readRDS("data/grid_scenarios.rds")
 #   # view
 #   saveRDS("./data/grid_scenarios.rds")
 
-df_tool = read_parquet("data/loads/B1_to_B213.parquet", as_data_frame=T)
+df_tool = read_parquet("../data/loads/B1_to_B213.parquet", as_data_frame=T)
 names(df_tool) = c("building","datetime", "hhw", "chw", "oa_t", "source")
 df_measured = filter(df_tool, source == "measured")
 df = df_measured

@@ -14,6 +14,7 @@
 - TBD
 
 **TODO**:
+- check code/filepaths for HR
 - Add data dictionary for all data files
 - Add descriptions for functions
 

@@ -4,9 +4,10 @@ author:
   - Urwa Irfan ^[Center for the Built Environment, University of California at Berkeley, USA] ^[Correspondence to urwa@berkeley.edu], Paul Raftery ^1^, Stet Sanborn ^[SmithGroup]
 date: "`r Sys.Date()`"
 format:
- docx:
+#  docx:
+  html:
     toc: false
-    reference-doc: "../format/template.docx"
+    # reference-doc: "../format/template.docx"
     number-sections: true
     fig-align: center
 editor_options: 
@@ -30,7 +31,7 @@ knitr::opts_chunk$set(
   fig.show = "hold",
   fig.pos = "b",
   fig.width = 6.5, fig.height = 8.5, # these are the default figure sizes
-  fig.path = "../figs/paper/"
+  fig.path = "../figs/paper/hhw/"
 )
 
 # str(knitr::opts_chunk$get()) # run this in the console for all knitr config options
@@ -44,6 +45,7 @@ library(ggplot2)
 library(patchwork)
 library(flextable)
 library(showtext)
+library(scales)
 
 options(
   scipen = 999, # turn off scientific notation,
@@ -84,7 +86,7 @@ final_pal = c("#3b7ea1", "#b0750c", "#003262")
 # source("code/import_data.R")
 # source("code/model_functions.R")
 # source("code/model_scenarios.R")
-source("code/model_run.R")
+source("../code/model_run.R")
 ```
 
 
@@ -655,6 +657,39 @@ summary |>
     geom_point(shape = 18) +
     labs(y="Percent difference in annual heating emissions", x = "Tank sizing factor", color = "") +
     scale_y_continuous(limits=c(-50,0), breaks = seq(-50, 0, 10), labels = percent(seq(-0.5,0,0.1))) +
+    scale_x_continuous(labels = c("1x", "2x", "3x", "4x", "5x")) +
+    theme(legend.position="top") +
+    scale_color_manual(values = c("#b0750c", "#3b7ea1", "#D9661F")) +
+    # facet_grid(fac_label ~ .)
+    facet_wrap(~ fac_label) 
+```
+
+
+```{r fig-awhp_tot_energy, include = FALSE, eval = FALSE}
+#| fig-cap: "Heating electricity usage compared to no-TES scenario"
+#| fig-width: 8
+#| fig-height: 4
+ann_awhp = select(AWHP_sizes, ID, red = `AWHP capacity reduction`) |>
+  mutate(red = as.numeric(str_extract(red, ".*(?=%)"))) |>
+  mutate(red = round(red)) |>
+  mutate(red = str_c(as.character(red), "%")) |>
+  mutate(tag = str_c("Building ", ID), fac_label = str_c(tag, "\nMax AWHP size reduction: ", red))
+
+summary |>
+  left_join(ann_awhp, by = "ID") |>
+  filter(!(desc %in% c("No TES", "BaselineGas"))) |>
+  mutate(sizing_plot = case_when(
+    tes_sizing == "Partial" ~ 1,
+    tes_sizing == "2x Partial" ~ 2,
+    tes_sizing == "3x Partial" ~ 3,
+    tes_sizing == "4x Partial" ~ 4,
+    tes_sizing == "5x Partial" ~ 5,
+  )) |>
+  ggplot(aes(sizing_plot, elec_awhp_h_diff, color = tes_legend)) +
+    geom_line() +
+    geom_point(shape = 18) +
+    labs(y="Percent difference in annual heating energy usage", x = "Tank sizing factor", color = "") +
+    scale_y_continuous(limits=c(-10,5), breaks = seq(-10, 5, 5), labels = percent(seq(-0.1,0.05,0.05))) +
     scale_x_continuous(labels = c("1x", "2x", "3x", "4x", "5x")) +
     theme(legend.position="top") +
     scale_color_manual(values = c("#b0750c", "#3b7ea1", "#D9661F")) +

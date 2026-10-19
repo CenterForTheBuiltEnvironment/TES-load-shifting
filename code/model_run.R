@@ -2,9 +2,9 @@ library(tidyverse)
 library(lubridate)
 library(magrittr)
 
-source("code/basic_functions.R")
-source("code/import_data.R")
-source("code/model_scenarios.R")
+source("../code/basic_functions.R")
+source("../code/import_data.R")
+source("../code/model_scenarios.R")
 
 # -------- multiple buildings --------
 results_all = df %>% 

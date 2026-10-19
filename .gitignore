@@ -1,3 +1,6 @@
+figs/working/*
+paper/load_shifting_*_files
+
 # History files
 .Rhistory
 .Rapp.history

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Urwa Irfan  , Paul Raftery 1, Stet Sanborn ">
+<meta name="dcterms.date" content="2026-10-19">
+
+<title>Sizing and Control Strategies for Hot Water Thermal Energy Storage in All-Electric HVAC Plants</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="load_shifting_hhw_files/libs/clipboard/clipboard.min.js"></script>
+<script src="load_shifting_hhw_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="load_shifting_hhw_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="load_shifting_hhw_files/libs/quarto-html/popper.min.js"></script>
+<script src="load_shifting_hhw_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="load_shifting_hhw_files/libs/quarto-html/anchor.min.js"></script>
+<link href="load_shifting_hhw_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="load_shifting_hhw_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="load_shifting_hhw_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="load_shifting_hhw_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="load_shifting_hhw_files/libs/bootstrap/bootstrap-215b371544c282197b31c8aa00ce3677.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="load_shifting_hhw_files/libs/tabwid-1.1.3/tabwid.css" rel="stylesheet">
+
+<script src="load_shifting_hhw_files/libs/tabwid-1.1.3/tabwid.js"></script>
+
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Sizing and Control Strategies for Hot Water Thermal Energy Storage in All-Electric HVAC Plants</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Urwa Irfan <a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> <a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>, Paul Raftery <sup>1</sup>, Stet Sanborn <a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="abstract" class="level1 unnumbered">
+<h1 class="unnumbered">Abstract</h1>
+<p>The addition of thermal energy storage (TES) to shift thermal loads to off-peak periods of the day effectively reduces HVAC system energy costs, emissions, and peak electric demand. While cool thermal storage systems are well documented in the existing literature, this study analyzes TES for heating hot water systems. Heating hot water TES is increasingly common as designers switch from gas boilers to heat pumps and is more economical than chilled water TES due to higher system temperature differentials. Additionally, TES systems can be configured for a range of applications, including leveling design day peak loads, minimizing utility costs, reducing short-cycling related wear and tear, capturing capacity from non-simultaneous heat recovery, and improving heat pump efficiency. Current design guidance addressing these various applications is incomplete and dispersed across sources; this paper details appropriate rule-based control strategies that can be adopted for each application. We evaluate annual energy use and emissions for the proposed configurations using marginal grid emissions rates and a plant model with air-source heat pumps for primary heating. The model is analyzed over a dataset of measured heating hot water loads from six existing commercial buildings in California, covering a range of daily and seasonal load profile characteristics. Results show that the addition of TES can simultaneously reduce required heat pump capacity and operational carbon emissions, with up to 15% annual emissions reduction using the minimum tank size for load leveling. The magnitude of these savings is closely tied to both the sizing strategy and the variation in the control signal. For certain load profiles, further emissions reductions can be achieved by increasing the tank volume; while the cost of additional storage is not offset by a reduction in installed heat pump capacity, the carbon mitigation impact is comparable to that of electrifying from gas to electric heating in the first place. By identifying the impact of various sizing and control strategies on emissions across various building load profiles, this study provides actionable findings and recommendations in designing and implementing TES systems.</p>
+</section>
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Thermal energy storage (TES) is an increasingly common strategy for shifting HVAC loads to favorable conditions for energy consumption or utility costs. It has historically been employed in chilled water (CHW) systems largely to reduce electricity costs and the installed size and cost of refrigeration equipment. As the industry decarbonizes heating systems by switching from gas boilers to heat pumps, there is a growing need to address these same concerns using heating hot water (HHW) TES. Prior research shows that most buildings’ hot water systems operate at low part loads the majority of the time <span class="citation" data-cites="rafteryInsightsHydronicHeating2024">(<a href="#ref-rafteryInsightsHydronicHeating2024" role="doc-biblioref">Raftery et al. 2024</a>)</span>. The addition of TES for peak load leveling can thus allow substantial downsizing of air-source heat pumps, resulting in considerable cost savings due to the high first cost of heat pumps. Additionally, since HHW systems typically operate with larger ΔTs than CHW loops, hot water TES provides more storage capacity for the same volume and first cost.</p>
+<p>There is limited literature evaluating heat pump – particularly air-to-water heat pump (AWHP) – systems with hot water TES. One study demonstrated the cost effectiveness of a TES-integrated ground-source heat pump system using measured loads from a university campus with various charging control strategies <span class="citation" data-cites="ryanApplicationThermalEnergy2022">(<a href="#ref-ryanApplicationThermalEnergy2022" role="doc-biblioref">E. Ryan et al. 2022</a>)</span>. Another pilot study installed AWHP with HHW TES systems in California single-family homes <span class="citation" data-cites="weigelTechnicalEvaluationAirtoWater2025">(<a href="#ref-weigelTechnicalEvaluationAirtoWater2025" role="doc-biblioref">Weigel et al. 2025</a>)</span>. There are additional papers demonstrating operational cost savings from chilled water TES, integrated either with heat pumps or traditional chillers, based on measured data <span class="citation" data-cites="woldekidanTechnoEconomicAnalysisAddition2025 choOptimalControlStrategies2021 khunStrategyEnergySavings2025 rahmanFeasibilityThermalEnergy2011 qiaoFieldTestingSimulation2026">(<a href="#ref-woldekidanTechnoEconomicAnalysisAddition2025" role="doc-biblioref">Woldekidan et al. 2025</a>; <a href="#ref-choOptimalControlStrategies2021" role="doc-biblioref">Cho et al. 2021</a>; <a href="#ref-khunStrategyEnergySavings2025" role="doc-biblioref">Khun et al. 2025</a>; <a href="#ref-rahmanFeasibilityThermalEnergy2011" role="doc-biblioref">Rahman et al. 2011</a>; <a href="#ref-qiaoFieldTestingSimulation2026" role="doc-biblioref">Qiao et al. 2026</a>)</span>, but few use complete annual datasets. There is also a lack of research on the carbon impact of adding TES to a heat pump plant, particularly using marginal operating emissions rates which more accurately capture the variation in daily electricity generation emissions than average rates <span class="citation" data-cites="ryanMarginal2024">(<a href="#ref-ryanMarginal2024" role="doc-biblioref">W. Ryan 2024</a>)</span>. <span class="citation" data-cites="sultanCarbonMitigationPotential2023">Sultan et al. (<a href="#ref-sultanCarbonMitigationPotential2023" role="doc-biblioref">2023</a>)</span> simulated a residential CHW TES system and calculated 12% grid emissions reduction over one week of operation.</p>
+<p>This paper applies and expands on existing ASHRAE guidance for sizing and controlling cooling TES systems <span class="citation" data-cites="glazerjasonASHRAEDesignGuide2019 ashraeHandbook2024">(<a href="#ref-glazerjasonASHRAEDesignGuide2019" role="doc-biblioref">Glazer 2019</a>; <a href="#ref-ashraeHandbook2024" role="doc-biblioref">ASHRAE 2024</a>)</span> to evaluate an all-electric heating plant consisting of air-to-water heat pumps and heating hot water TES. We model this using a dataset of full-year measured loads from 6 buildings to assess the contribution of load profile variation on equipment sizing. We quantify the carbon emissions impact of various sizing and control strategies and propose a framework for controlling AWHP-TES systems in order to maximize load shifting potential.</p>
+</section>
+<section id="methods" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Methods</h1>
+<section id="inputs-and-assumptions" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="inputs-and-assumptions"><span class="header-section-number">2.1</span> Inputs and Assumptions</h2>
+<p>This study uses one year of measurements of outside air temperature and conditioning loads gathered from the building automation systems of six buildings in San Francisco, California (ASHRAE Climate Zone 3C). Load data was either directly metered or calculated from flow meter and temperature sensor measurements. <a href="#fig-dataset_szn" class="quarto-xref">Figure&nbsp;1</a> plots the average seasonal heating hot water (HHW) and chilled water (CHW) loads for each building in the dataset. Buildings A and B are academic buildings; C, D, and E are laboratory buildings; and F is a mixed-use laboratory/office building.</p>
+<p>HVAC energy consumption is modeled with a combination of AWHPs and thermal energy storage tanks. In the scenarios with no storage, the AWHPs are sized to serve the peak hourly heating load, and an air-cooled electric chiller is included to serve any excess chilled water loads. We used the performance data obtained from two different manufacturers to generate curves for heating capacity and coefficient of performance (COP) based on outside air temperature, shown in <a href="#fig-awhp_curves" class="quarto-xref">Figure&nbsp;2</a>, for a nominal 211 kW (720 kBtu/h) modular unit at a HHW supply temperature of 54°C (130°F).</p>
+<p>Any analysis of load shifting – to optimize for an operational parameter such as cost or emissions beyond peak load leveling – is predicated on some form of cost signal to define appropriate charging or discharging periods. This is typically utility cost rates with the goal of minimizing operational cost, but could also be equipment operating efficiency in order to minimize energy consumption. This paper uses electricity use emissions as the cost signal, modeled using long-run marginal grid emissions rates for 2025 sourced from NLR’s Cambium 2024 dataset <span class="citation" data-cites="gagnonCambium2024Scenario2024">(<a href="#ref-gagnonCambium2024Scenario2024" role="doc-biblioref">Gagnon et al. 2024</a>)</span>. This data is easily accessible and clearly demonstrates the tangible environmental impact of different system configurations. All analyzed buildings fall in the CAISO grid region, and we use the MidCase grid scenario. <a href="#fig-awhp_curves" class="quarto-xref">Figure&nbsp;2</a> shows the distribution of hourly grid emissions factors in the selected dataset, highlighting the potential to substantially reduce emissions each day by shifting electrical loads to the hours around midday in this grid region.</p>
+</section>
+<section id="system-sizing" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="system-sizing"><span class="header-section-number">2.2</span> System Sizing</h2>
+<p>Sizing for AWHP-TES systems depends on the proportion of peak loads the tank is expected to satisfy, and there is a tradeoff between the TES capacity required to serve loads above the AWHP’s maximum capacity under peak load conditions versus the TES capacity available for load shifting. This interaction is described in detail in <span class="citation" data-cites="casillasConsiderationsIntelligentlySizing2023">Casillas et al. (<a href="#ref-casillasConsiderationsIntelligentlySizing2023" role="doc-biblioref">2023</a>)</span>. The ASHRAE Systems Handbook describes a standard method for chilled water storage which sizes the TES to minimize the total cooling equipment size, such that the latter can meet loads on the peak day by operating at maximum capacity continuously. This is called <em>partial storage</em> (or load leveling) because the TES contributes only partially to the peak load and both chiller and tank must operate, in contrast to <em>full storage</em> where the TES would be sized to fully meet loads (with the cooling plant disabled) during a predetermined on-peak (cost) period.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-dataset_szn" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dataset_szn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-dataset_szn-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="2400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dataset_szn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Aggregated mean building loads by season
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-awhp_curves" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-awhp_curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-awhp_curves-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="3000">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-awhp_curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: (L) AWHP performance curves and (R) Grid emissions factors with respect to time of day
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The NLR Decarbonizing Building Thermal Systems guide briefly discusses heating TES systems and recommends the same sizing strategies as a starting point for designers <span class="citation" data-cites="houssainyDecarbonizingBuildingThermal2024a">(<a href="#ref-houssainyDecarbonizingBuildingThermal2024a" role="doc-biblioref">Houssainy et al. 2024</a>)</span>. It is also important to note that the peak day for TES sizing refers to the day with the largest aggregated total load, which does not always coincide with the day with the largest hourly load. (This is the case for building B, which is why the AWHP does not operate up to maximum capacity in the no-TES peak day plot in <a href="#fig-hp_priority" class="quarto-xref">Figure&nbsp;4</a>).</p>
+<p>This paper uses the partial storage sizing strategy for heating loads. While this method results in less load shifting flexibility during high load periods, it is the lowest first-cost scenario because it minimizes heat pump size with the smallest possible tank. Increasing TES capacity beyond this point rapidly escalates first costs as it does not allow any further first cost reduction in heat pump capacity. <a href="#fig-sizing" class="quarto-xref">Figure&nbsp;3</a> represents an example peak day profile. The AWHP capacity is the sum of the peak day loads divided by 24 hours, and the TES capacity is the sum of the positive (or negative) difference between the hourly load and AWHP capacity. For simplicity, we assume constant AWHP capacity for sizing, determined at the lowest outside air temperature on the peak day (capacity varies based on hourly outside air temperature in the subsequent annual simulations). <a href="#tbl-equip_sizing" class="quarto-xref">Table&nbsp;1</a> lists the calculated equipment sizes. The tank volume is calculated using an 11°C (20°F) hot water ΔT and refers to the usable storage volume, which is dependent on the tank and diffuser geometry and stratification effectiveness and is typically less than the nominal tank volume. Common values for the figure of merit – a metric that incorporates these factors to define the usable volume – range from 80-90% of nominal volume <span class="citation" data-cites="glazerjasonASHRAEDesignGuide2019">(<a href="#ref-glazerjasonASHRAEDesignGuide2019" role="doc-biblioref">Glazer 2019</a>)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-sizing" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-sizing-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="2400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: System sizing (Building B)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-equip_sizing" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-equip_sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Equipment sizing
+</figcaption>
+<div aria-describedby="tbl-equip_sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="tabwid"><style>.cl-d8bad469{}.cl-9f1c1ce9{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-6477613b{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-a1958ec5{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-150da73b{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8e0ee45a{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1c23095b{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-a18b2e34{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-45102fc2{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-c9ec629b{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing="true" class="cl-d8bad469"><thead><tr style="overflow-wrap:break-word;"><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">Building ID</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">Floor area, 1,000 m² (1,000 ft²)</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">AWHP capacity without TES, kW (kBtu/h)</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">AWHP capacity with TES, kW (kBtu/h)</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">AWHP capacity reduction</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">TES capacity, kWh (kBtu)</span></p></th><th class="cl-150da73b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">TES volume, 1,000 l (1,000 gal)</span></p></th><th class="cl-8e0ee45a"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">Time to fully charge TES by AWHP at max capacity, hrs</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">A</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1 (11)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">58 (198)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">16 (55)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">72%</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">161 (549)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">13 (3)</span></p></td><td class="cl-a18b2e34"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">10.3</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">B</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">5 (54)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">567 (1940)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">275 (938)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">51%</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1140 (3890)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">89 (24)</span></p></td><td class="cl-a18b2e34"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">4.2</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">C</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">10 (108)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1150 (3920)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">827 (2820)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">28%</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1490 (5080)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">116 (31)</span></p></td><td class="cl-a18b2e34"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">1.9</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">D</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">7 (75)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1080 (3680)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">826 (2820)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">24%</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">2040 (6960)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">159 (42)</span></p></td><td class="cl-a18b2e34"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">2.5</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">E</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">6 (65)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1450 (4950)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1240 (4230)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">14%</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">1370 (4670)</span></p></td><td class="cl-1c23095b"><p class="cl-6477613b"><span class="cl-9f1c1ce9">107 (28)</span></p></td><td class="cl-a18b2e34"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">1.2</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">F</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">8 (86)</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">219 (747)</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">164 (560)</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">25%</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">194 (662)</span></p></td><td class="cl-45102fc2"><p class="cl-6477613b"><span class="cl-9f1c1ce9">15 (4)</span></p></td><td class="cl-c9ec629b"><p class="cl-a1958ec5"><span class="cl-9f1c1ce9">1.2</span></p></td></tr></tbody></table></div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="control-strategies" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="control-strategies"><span class="header-section-number">2.3</span> Control Strategies</h2>
+<p><strong>Control strategy 1: AWHP Priority.</strong> The first control strategy modeled is a typical “chiller-priority” load leveling strategy, where the heat pump is operated up to its maximum capacity and the tank discharges to meet any loads in excess of this capacity <span class="citation" data-cites="ashraeHandbook2024">(<a href="#ref-ashraeHandbook2024" role="doc-biblioref">ASHRAE 2024</a>)</span>. The TES is not intentionally leveraged to reduce energy or emissions through load shifting; the plant solely uses it to meet loads with a smaller heat pump. We assume the tank is fully charged at the beginning of the year. <a href="#fig-hp_priority" class="quarto-xref">Figure&nbsp;4</a> illustrates this for building B, showing the operating profiles for the tank state of charge and AWHP load on the peak heating day plus one representative day from the heating and cooling seasons. The profiles for a scenario with no TES (load is served fully by AWHPs) are included for comparison, and the annotations refer to the percentage difference in electricity use emissions from heating equipment (in this case, the AWHP) from the corresponding no-TES case on that day.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-hp_priority" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hp_priority-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-hp_priority-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="2400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hp_priority-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Control strategy 1: AWHP Priority (Building B)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>This load leveling strategy results in a total of 2.2% savings in annual heating equipment electricity use emissions for this building. We can observe that the AWHP operation is largely unchanged between the two cases: the heating load exceeds the AWHP capacity, thus requiring the tank to discharge, for only 2.6% of hours. In the laboratory buildings in the dataset with “smoother” peak day profiles (i.e.&nbsp;there is a smaller variation between the peak day’s minimum and maximum load, so the AWHP is larger in proportion to the peak load) this percentage – and thus the emissions savings – is even lower. These findings align with our understanding of HHW load distributions being highly skewed toward low part loads.</p>
+<p><strong>Control strategy 2: Fixed On-Peak Discharging.</strong> In order to benefit from the load shifting potential of thermal energy storage, a “storage-priority” control strategy must be employed in which the tank is intentionally discharged in lieu of operating the heat pump, when feasible to do so while still meeting building loads. A basic implementation of this is to define a daily on-peak period (i.e., peak grid emissions rate) during which the TES takes priority over the AWHP to serve any loads. Control strategy 2 accordingly uses the previous day’s emissions rate profile to select a 4-hour on-peak period with the highest total emissions rate at the start of each day. The green and unshaded regions in <a href="#fig-control_two" class="quarto-xref">Figure&nbsp;5</a> highlight the hours in which the AWHP and TES are prioritized, respectively.</p>
+<p>To prevent the tank from discharging prematurely before high load conditions and the AWHP subsequently having insufficient capacity to serve loads alone, we include an override to the above logic based on outside air temperature (OAT). This override resets a minimum tank charge setpoint at limits defined as the peak day OAT plus 2°C and 6°C, e.g.&nbsp;for building B with a peak day OAT of 3.8°C (39°F), the minimum tank charge is reset between 100% at 5.8°C (42°F) and 0% at 9.8°C (50°F). If the on-peak-hour control strategy would result in the tank charge dropping below the OAT-based minimum, the heat pump is enabled regardless of priority, shown shaded blue in <a href="#fig-control_two" class="quarto-xref">Figure&nbsp;5</a>. This ensures the tank retains enough capacity required for load leveling on colder days when instantaneous heating loads exceed the AWHP capacity.</p>
+<p>There is a clear benefit to consistently discharging the tank each day. The percentage of hours in the year in which the tank is used (i.e.&nbsp;discharged to meet loads) increases to 9.2%, which results in 8.1% savings in annual heating electricity use emissions. However, because this strategy is blind to the actual daily conditioning requirements, there are many instances where the tank is underutilized, such as in the September day operation in <a href="#fig-control_two" class="quarto-xref">Figure&nbsp;5</a>. Some information about the upcoming load profile must be incorporated to effectively enhance the tank’s operation.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-control_two" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-control_two-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-control_two-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="2400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-control_two-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Control strategies 2 and 3: Fixed On-Peak Charging and Calculated Off-Peak Charging
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Control strategy 3: Calculated Off-Peak Charging.</strong> Instead of defining a period in which the AWHP is not preferred to operate, the final modeled strategy determines the minimum and grid optimal period to operate the heat pump that ensures sufficient storage capacity for the rest of the day. At the start of each day, we calculate the number of hours the AWHP needs to operate at maximum capacity to meet the sum of the previous day’s loads. We define an “off-peak” period of this calculated number of hours with the lowest total grid emissions rate and prioritize the AWHP during this period only unless overridden by the OAT reset. This allows the AWHP operation to be limited to the minimum period required to serve loads, during the most favourable grid conditions, and is a strong improvement over the previous control strategies with 28.4% annual tank utilization and 15.4% annual heating emissions savings.</p>
+</section>
+<section id="limitations" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="limitations"><span class="header-section-number">2.4</span> Limitations</h2>
+<p>For the purposes of this analysis, we assume the existing measured loads are unchanged, but it is important to note that various load reduction or smoothing measures such as ramped morning warmup or supply air temperature reset can greatly reduce heating energy consumption in buildings <span class="citation" data-cites="chengHotWaterHeating2024">(<a href="#ref-chengHotWaterHeating2024" role="doc-biblioref">Cheng et al. 2024</a>)</span> and should be considered first, prior to sizing plant equipment. Additionally, we assumed no standby losses from the tank and did not model short-cycling effects for the heat pumps or auxiliary system components such as pumps and terminal units in the annual simulations. As a result, the reported emissions savings may be overstated, particularly for the larger tank sizes.</p>
+<p>For control strategy 3, using the previous day’s loads to determine the AWHP operating periods is an estimation and results in some under- and over-utilization of the TES because it does not account for unoccupied days or sudden changes in weather. However, this approximation keeps the proposed controls straightforward to implement in a building automation system. While forecasting models may be more accurate, they are computationally heavy, cost-intensive to implement, and industry adoption is low <span class="citation" data-cites="killianTenQuestionsConcerning2016 kimSiteDemonstrationPerformance2022">(<a href="#ref-killianTenQuestionsConcerning2016" role="doc-biblioref">Killian and Kozek 2016</a>; <a href="#ref-kimSiteDemonstrationPerformance2022" role="doc-biblioref">Kim et al. 2022</a>)</span>.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Results and Discussion</h1>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-awhp_tot_emissions" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="b">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-awhp_tot_emissions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figs/paper/hhw/fig-awhp_tot_emissions-1.jpeg" class="img-fluid figure-img" data-fig-pos="b" width="2400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-awhp_tot_emissions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Heating electricity use emissions compared to no-TES scenario
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-awhp_tot_emissions" class="quarto-xref">Figure&nbsp;6</a> shows a comparison of annual heating emissions savings for each building and control strategy across a range of TES capacities, where 1x represents the original sizing calculated in <a href="#tbl-equip_sizing" class="quarto-xref">Table&nbsp;1</a>, 2x corresponds to double that capacity, and so on. While the results invariably show a reduction in operational emissions from the no-TES scenario, the magnitude of this reduction is closely tied to the equipment sizing, which varies substantially based on the building load profile. As previously discussed, buildings with a larger peak day load range have proportionally smaller AWHPs. This in turn results in proportionally larger tank sizes, indicated by the time to full charge listed in <a href="#tbl-equip_sizing" class="quarto-xref">Table&nbsp;1</a>. Buildings E and F both have the smallest relative tank size (1.2 hours to full charge) and comparatively consistent daily heating loads (<a href="#fig-dataset_szn" class="quarto-xref">Figure&nbsp;1</a>). The combination of these factors means the TES regularly discharges to zero during unfavorable emissions conditions and would benefit from upsizing, as <a href="#fig-awhp_tot_emissions" class="quarto-xref">Figure&nbsp;6</a> demonstrates. However, since the AWHPs are sized for the smallest possible capacity to meet peak day loads, increasing the TES volume does not further offset their first cost. In contrast, building A and B’s oversized tanks along with their highly seasonal heating loads signifies that while the load shifting potential is being leveraged well, there is opportunity to reduce the tank size without heavily affecting emissions savings. For all cases, we observe diminishing returns in terms of emissions savings from increased storage capacity. A sensitivity analysis in this manner can help quickly identify the threshold at which the cost of additional TES volume outweighs its emissions (or energy, or operational cost) benefits.</p>
+<p>Defining the appropriate cost signal for any given application is essential as its characteristics have a significant impact on the load shifting operation. The grid emissions rate in California varies considerably over the course of a day, whereas outside air temperature variation is low. In other climates and grid regions, the the OAT-based equipment efficiency variation may contribute more to emissions savings than the grid emissions factors, and optimizing for energy use may be more suitable. For this analysis optimizing for emissions, the difference in annual energy use from no-TES to TES is below 2% for nearly all cases. The same cost signal will also have varying effects based on the tank configuration – for instance, in California where grid emissions are lowest in the daytime, a HHW tank allows better equipment efficiency by operating in those hours, whereas a CHW tank would mean operating the AWHP at lower efficiencies. The opposite would hold true if optimizing for cost, since utility costs generally peak in the late afternoon and early evening. A system analysis using utility costs should carefully verify the input assumptions, as cost savings are similarly contingent on utility rate structure and rate schedules can periodically change in certain regions <span class="citation" data-cites="weigelTechnicalEvaluationAirtoWater2025">(<a href="#ref-weigelTechnicalEvaluationAirtoWater2025" role="doc-biblioref">Weigel et al. 2025</a>)</span>.</p>
+<p>While the analysis presented here covers HHW tanks, these control strategies can be adopted for CHW systems without extensive adjustments. We assumed heating-driven sizing, but a CHW tank is better suited for a cooling-dominant building where AWHPs are the only equipment serving cooling loads and thus sized for cooling. Seasonal switchover to allow operation on both loops would maximize load shifting potential. For a CHW tank system served by a variable-speed chiller, it would be beneficial to vary the charging rate to allow the chiller to operate at lower part-loads and thus higher efficiency. If optimizing for utility cost instead of energy use or emissions, such a strategy would also help reduce peak demand charges. Maintaining lower part loads is less beneficial for modular heat pump equipment with limited turndown capacity.</p>
+<p>TES systems have several additional benefits. Hot water TES in particular can be designed with independent control of supply water temperature and tank storage temperature by using a secondary mixing strategy, which allows for a dynamic upward reset of the tank storage temperature based on predicted future load. This is limited only by the capabilities of the heat pump and durability and heat loss of the tank material and effectively increases the thermal storage capacity by creating a larger ΔT. Modular heat pump plants typically include buffer tanks to meet manufacturers’ minimum system volume requirements that help reduce short-cycling <span class="citation" data-cites="cervera-vazquezSizingBufferTank2016">(<a href="#ref-cervera-vazquezSizingBufferTank2016" role="doc-biblioref">Cervera-Vázquez et al. 2016</a>)</span>; a TES tank can serve this purpose as well. TES is also well-established as a demand response strategy <span class="citation" data-cites="glazerjasonASHRAEDesignGuide2019">(<a href="#ref-glazerjasonASHRAEDesignGuide2019" role="doc-biblioref">Glazer 2019</a>)</span> which can be incorporated into an existing control methodology. Lastly, further research is needed on the heat recovery application of TES – shifting daily load profiles to create more simultaneous load, capturing a larger fraction of potential heat recovery. This has been shown to reduce energy consumption and improve equipment efficiency <span class="citation" data-cites="gillSolvingLargeBuilding2021 ElectrifyingLarge2026">(<a href="#ref-gillSolvingLargeBuilding2021" role="doc-biblioref">Gill 2021</a>; <a href="#ref-ElectrifyingLarge2026" role="doc-biblioref">Cheng et al. 2026</a>)</span>.</p>
+</section>
+<section id="conclusion" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Conclusion</h1>
+<p>This study presents a framework for evaluating AWHP systems with heating hot water thermal energy storage. We used real-world measured building load data to quantify the extent to which the addition of TES can minimize installed heat pump capacity and help avoid the substantial first costs associated with that capacity. By modeling various control strategies with relatively simple rule-based control logic to maximize on load shifting potential, we demonstrate up to 15% reduction in annual heating electricity use emissions using the minimum tank size for load leveling compared to a design without storage. A key takeaway is an understanding of how the variation in building load profile significantly impacts sizing strategy outcomes, and how the sizing outcomes affect load shifting operation. Additional emissions savings (up to 49%) are achievable by increasing the TES volume for buildings with suitable load profiles, but this intensifies first costs as it is not accompanied by further reductions in AWHP capacity. Some of these savings can be captured by implementing a tank storage temperature reset to increase ΔT when the heat pump is able to produce higher supply water temperatures. The emissions impact of increasing tank capacity should not be underestimated – in comparison, the emissions reduction achieved by electrifying the heating system from an 80% efficient gas boiler to full AWHP (without TES) ranges from 53-62% for the analyzed buildings. These findings provide valuable insights for TES-AWHP system design and operation, a system type that will only become more worthwhile as building heating systems are electrified and increase demand on the electric grid.</p>
+</section>
+<section id="acknowledgements" class="level1 unnumbered">
+<h1 class="unnumbered">Acknowledgements</h1>
+<p>The California Energy Commission (grant #EPC-23-023) and the Center for the Built Environment at the University of California, Berkeley supported this research.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-ashraeHandbook2024" class="csl-entry" role="listitem">
+ASHRAE. 2024. <em><span>ASHRAE Handbook</span> - <span>HVAC Systems</span> and <span>Equipment</span></em>.
+</div>
+<div id="ref-casillasConsiderationsIntelligentlySizing2023" class="csl-entry" role="listitem">
+Casillas, Armando, Sang Woo Ham, Dre Helmns, and Lazlo Paul. 2023. <span>“Considerations in <span>Intelligently Sizing</span> and <span>Controlling TES-Integrated HVAC Systems</span>.”</span> <em><span>ASHRAE Transactions</span></em> (Atlanta, United States) 129: 558–65.
+</div>
+<div id="ref-cervera-vazquezSizingBufferTank2016" class="csl-entry" role="listitem">
+Cervera-Vázquez, Javier, Carla Montagud-Montalvá, and José Miguel Corberán. 2016. <span>“Sizing of the Buffer Tank in Chilled Water Distribution Air-Conditioning Systems.”</span> <em>Science and Technology for the Built Environment</em> 22 (3): 290–98. <a href="https://doi.org/10.1080/23744731.2016.1131569">https://doi.org/10.1080/23744731.2016.1131569</a>.
+</div>
+<div id="ref-ElectrifyingLarge2026" class="csl-entry" role="listitem">
+Cheng, Hwakong, Curtis Fong, Titus Ellison, et al. 2026. <em>Electrifying <span>Large Commercial Central Plants</span>: <span>Demonstration</span> of <span>TIER</span> and <span>Program Delivery Solutions</span></em>. ET24SWE0028. CalNEXT.
+</div>
+<div id="ref-chengHotWaterHeating2024" class="csl-entry" role="listitem">
+Cheng, Hwakong, Pat Wendler, and Paul Raftery. 2024. <em>Hot <span>Water Heating</span>: <span>Design</span> and <span>Retrofit Guide</span></em>.
+</div>
+<div id="ref-choOptimalControlStrategies2021" class="csl-entry" role="listitem">
+Cho, Seongkwon, Han Gyeong Chu, and Cheol-Soo Park. 2021. <span>“Optimal Control Strategies of an Ice-Based Thermal Energy Storage System in an Existing Office Building.”</span> <em>Building <span>Simulation</span> 2021</em>, Building <span>Simulation</span>, vol. 17: 3610–15. <a href="https://doi.org/10.26868/25222708.2021.30665">https://doi.org/10.26868/25222708.2021.30665</a>.
+</div>
+<div id="ref-gagnonCambium2024Scenario2024" class="csl-entry" role="listitem">
+Gagnon, Pieter, Brady Cowiestoll, and Marty Schwarz. 2024. <span>“Cambium 2024 <span>Scenario Descriptions</span> and <span>Documentation</span>.”</span> <em>Renewable Energy</em>.
+</div>
+<div id="ref-gillSolvingLargeBuilding2021" class="csl-entry" role="listitem">
+Gill, Brandon. 2021. <span>“Solving the <span>Large Building All-Electric Heating Problem</span>.”</span> <em>ASHRAE Journal</em> 63 (10): 12–26.
+</div>
+<div id="ref-glazerjasonASHRAEDesignGuide2019" class="csl-entry" role="listitem">
+Glazer, Jason. 2019. <em><span>ASHRAE Design Guide</span> for <span>Cool Thermal Storage</span></em>. Second Edition. <span>American Society of Heating, Refrigerating and Air-Conditioning Engineers, Inc. ASHRAE</span>.
+</div>
+<div id="ref-houssainyDecarbonizingBuildingThermal2024a" class="csl-entry" role="listitem">
+Houssainy, Sammy, Landan Taylor, Paul Torcellini, and Sugirdhalakshmi Ramaraj. 2024. <em>Decarbonizing <span>Building Thermal Systems</span>: <span class="nocase">A How-to Guide</span> for <span>Heat Pump Systems</span> and <span>Beyond</span></em>. National Renewable Energy Laboratory.
+</div>
+<div id="ref-khunStrategyEnergySavings2025" class="csl-entry" role="listitem">
+Khun, Nang San, Thoranis Deethayat, Tanongkiat Kiatsiriroat, and Attakorn Asanakham. 2025. <span>“Strategy for <span>Energy Savings</span> in a <span class="nocase">Commercial Building Air-conditioning System</span> with <span>Chilled Water Storage</span>: <span>A Case Study</span> in a <span>Retail Mall</span> in <span>Thailand</span>.”</span> <em>Journal of Current Science and Technology</em> 15 (1): 89–89. <a href="https://doi.org/10.59796/jcst.V15N1.2025.89">https://doi.org/10.59796/jcst.V15N1.2025.89</a>.
+</div>
+<div id="ref-killianTenQuestionsConcerning2016" class="csl-entry" role="listitem">
+Killian, M., and M. Kozek. 2016. <span>“Ten Questions Concerning Model Predictive Control for Energy Efficient Buildings.”</span> <em>Building and Environment</em> 105 (August): 403–12. <a href="https://doi.org/10.1016/j.buildenv.2016.05.034">https://doi.org/10.1016/j.buildenv.2016.05.034</a>.
+</div>
+<div id="ref-kimSiteDemonstrationPerformance2022" class="csl-entry" role="listitem">
+Kim, Donghun, Zhe Wang, James Brugger, et al. 2022. <span>“Site Demonstration and Performance Evaluation of <span>MPC</span> for a Large Chiller Plant with <span>TES</span> for Renewable Energy Integration and Grid Decarbonization.”</span> <em>Applied Energy</em> 321 (September): 119343. <a href="https://doi.org/10.1016/j.apenergy.2022.119343">https://doi.org/10.1016/j.apenergy.2022.119343</a>.
+</div>
+<div id="ref-qiaoFieldTestingSimulation2026" class="csl-entry" role="listitem">
+Qiao, Yiyuan, Lingshi Wang, Bo Shen, et al. 2026. <span>“Field Testing and Simulation of Load Shifting for Grid-Interactive Heat Pump Systems Integrated with Cold Thermal Energy Storage.”</span> <em>Energy Conversion and Management</em> 364 (September): 121704. <a href="https://doi.org/10.1016/j.enconman.2026.121704">https://doi.org/10.1016/j.enconman.2026.121704</a>.
+</div>
+<div id="ref-rafteryInsightsHydronicHeating2024" class="csl-entry" role="listitem">
+Raftery, Paul, Rupam Singla, Hwakong Cheng, and Gwelen Paliaga. 2024. <span>“Insights from Hydronic Heating Systems in 259 Commercial Buildings.”</span> <em>Energy and Buildings</em> 321 (October): 114543. <a href="https://doi.org/10.1016/j.enbuild.2024.114543">https://doi.org/10.1016/j.enbuild.2024.114543</a>.
+</div>
+<div id="ref-rahmanFeasibilityThermalEnergy2011" class="csl-entry" role="listitem">
+Rahman, M. M., M. G. Rasul, and M. M. K. Khan. 2011. <span>“Feasibility of Thermal Energy Storage Systems in an Institutional Building in Subtropical Climates in <span>Australia</span>.”</span> <em>Applied Thermal Engineering</em> 31 (14): 2943–50. <a href="https://doi.org/10.1016/j.applthermaleng.2011.05.025">https://doi.org/10.1016/j.applthermaleng.2011.05.025</a>.
+</div>
+<div id="ref-ryanApplicationThermalEnergy2022" class="csl-entry" role="listitem">
+Ryan, Erich, Benjamin McDaniel, and Dragoljub Kosanovic. 2022. <span>“Application of Thermal Energy Storage with Electrified Heating and Cooling in a Cold Climate.”</span> <em>Applied Energy</em> 328 (December): 120147. <a href="https://doi.org/10.1016/j.apenergy.2022.120147">https://doi.org/10.1016/j.apenergy.2022.120147</a>.
+</div>
+<div id="ref-ryanMarginal2024" class="csl-entry" role="listitem">
+Ryan, William. 2024. <span>“Understanding <span>Marginal Carbon Factors</span> and <span>Why They Matter</span>.”</span> <em>ASHRAE Journal</em> 66 (January): 32–39.
+</div>
+<div id="ref-sultanCarbonMitigationPotential2023" class="csl-entry" role="listitem">
+Sultan, Sara, Jason Hirschey, Zhenning Li, Bo Shen, Samuel Graham, and Kyle Gluesenkamp. 2023. <em>Carbon <span>Mitigation Potential</span> of <span>Heat Pump Integrated</span> with <span>Thermal Storage</span> for <span>Grid-Interactive Residential Buildings</span></em>. Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States).
+</div>
+<div id="ref-weigelTechnicalEvaluationAirtoWater2025" class="csl-entry" role="listitem">
+Weigel, Brent, Christine White, Gabriella Broga, Emma Casavant, and John Ho. 2025. <em>Technical <span>Evaluation</span> of <span class="nocase">Air-to-Water Heat Pumps</span> with <span>Thermal Storage</span></em>. CalNEXT.
+</div>
+<div id="ref-woldekidanTechnoEconomicAnalysisAddition2025" class="csl-entry" role="listitem">
+Woldekidan, Korbaga, Carlo Bianchi, Zahra Fallahi, and Tim J. LaClair. 2025. <span>“Techno-<span>Economic Analysis</span> for the <span>Addition</span> of a <span>Thermal Energy Storage System</span> to a <span>Central Plant</span>.”</span> <em>ASME Journal of Engineering for Sustainable Buildings and Cities</em> 6 (021003). <a href="https://doi.org/10.1115/1.4069026">https://doi.org/10.1115/1.4069026</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Center for the Built Environment, University of California at Berkeley, USA<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Correspondence to urwa@berkeley.edu<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>SmithGroup<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Center for the Built Environment, University of California at Berkeley, USA<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Correspondence to urwa@berkeley.edu<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>SmithGroup<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Center for the Built Environment, University of California at Berkeley, USA<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Correspondence to urwa@berkeley.edu<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>SmithGroup<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

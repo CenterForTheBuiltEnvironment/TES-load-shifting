@@ -6,6 +6,10 @@ library(patchwork)
 library(ggplot2)
 ```
 
+```{r scripts, include = FALSE}
+source("../code/model_run.R")
+```
+
 ```{r hr_actual, include = FALSE, eval = FALSE}
 plt_hr_actual = results_all |>
   # filter(desc == "No TES") |>

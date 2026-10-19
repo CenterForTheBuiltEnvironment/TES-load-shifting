@@ -4,6 +4,30 @@ library(lubridate)
 library(ggh4x)
 library(patchwork)
 library(ggplot2)
+library(ggtext)
+library(flextable)
+library(scales)
+library(glue)
+```
+
+```{r scripts, include = FALSE}
+source("code/model_run.R")
+```
+
+```{r themes}
+theme_set(theme_light(base_size = 10))
+theme_update(
+  strip.background = element_rect(fill = "#F5F5F5", color = "grey"),
+  strip.text = element_text(color = "black"),
+  strip.text.y = element_text(angle = 90),
+  panel.grid = element_line(linetype = "dotted") # lighten gridlines so just visible
+)
+
+cal_palette2 <- c("#3B7EA1", "#C4820E")
+cal_palette4 <- c("#003262", "#b0750c", "#3b7ea1", "#fdb515")
+cal_palette5 <- c("#003262", "#b0750c", "#3b7ea1", "#fdb515", "#D9661F")
+load_palette = c("#010090", "#8f0300")
+final_pal = c("#3b7ea1", "#b0750c", "#003262")
 ```
 
 ```{r oat_reset, include = FALSE, eval = FALSE}
@@ -19,28 +43,30 @@ plt_reset = results_all |>
     scale_y_continuous(limits = c(0,1), breaks = seq(0,1,0.1), labels = percent(seq(0,1,0.1))) +
     scale_x_continuous(limits = c(0,16), breaks = seq(0,16,2))
 
-# plt_reset
-# ggsave(glue("figs/2026-0728/oat_reset.png"), plot = plt_reset, width = 14, height=8, units = "in")
+plt_reset
+ggsave(glue("../figs/working/2026-1019/oat_reset.png"), plot = plt_reset, width = 14, height=8, units = "in")
 ```
 
 ```{r equip_timeseries_TES, fig.width=5, fig.height=4, include = FALSE, eval = FALSE}
+# this plot doesn't work well with many equip scenarios - filter as needed
+eq_scens = c(3,4,5,6,7)
 
 plt_yr = results_all |> 
+  filter(eq_scen_id %in% eq_scens) |>
   pivot_longer(cols = c(elec_awhp_h, gas, TES_charge), names_to = 'equipment', values_to = 'value') |>
   ggplot() + 
     geom_line(aes(datetime, value, color=equipment), alpha = 0.7) +
-    geom_point(data = equip_scenarios, aes(x = Inf, y = Inf, shape = legend), alpha=0) +
+    geom_point(data = filter(equip_scenarios, eq_scen_id %in% eq_scens), aes(x = Inf, y = Inf, shape = legend), alpha=0) +
     labs(x="", y="Energy use (W)", title = "Annual timeseries", shape="", color="") +
     facet_grid(building ~ eq_scen_id, scales = "free") +
     theme(legend.position="top") # +
     # scale_y_continuous(sec.axis = sec_axis(~ . , name = "Building ID", breaks = NULL, labels = NULL))
 
-# plt_yr
-# ggsave(glue("figs/2026-0707/timeseries.png"), plot = plt_yr, width = 16, units = "in")
+plt_yr
+ggsave(glue("../figs/working/2026-1019/timeseries.png"), plot = plt_yr, width = 16, units = "in")
 ```
 
 ```{r totals, include = FALSE, eval = FALSE}
-# filtered_results |> # elec, elec_hr, elec_res, elec_awhp_c, elec_chiller, 
 emissions_var = "awhp_h_emissions" #elec_emissions
 baseline = summary |> 
   filter(desc == "No TES") |>
@@ -72,12 +98,11 @@ plt_tot = summary |>
     # theme(axis.text.x = element_text(angle = 90, hjust=1)) #+
     # coord_flip() # to flip axes
 
-# plt_tot
-# ggsave(glue("figs/2026-0809/elec_emissions.png"), plot = plt_tot, width = 14, height=8, units = "in")
+plt_tot
+# ggsave(glue("../../figs/working/2026-0809/elec_emissions.png"), plot = plt_tot, width = 14, height=8, units = "in")
 ```
 
 ```{r totals_cooling, include = FALSE, eval = FALSE}
-# filtered_results |> # elec, elec_hr, elec_res, elec_awhp_c, elec_chiller, 
 emissions_var = "awhp_h_emissions" #elec_emissions
 baseline = summary |> 
   filter(desc == "No TES") |>
@@ -92,7 +117,7 @@ plt_tot_cooling = summary |>
   mutate(elec_c_emissions_diff = 100*(elec_c_emissions - elec_c_emissions_base)/elec_c_emissions_base) |>
   pivot_longer(cols = c(elec_emissions_diff, elec_c_emissions_diff), names_to = "emissions_diff", values_to = "value")
 
-plt_tot_cooling$emissions_diff = plt_tot_cooling(plt_tot$emissions_diff, levels = c("elec_emissions_diff", "elec_c_emissions_diff"))
+plt_tot_cooling$emissions_diff = factor(plt_tot_cooling$emissions_diff, levels = c("elec_emissions_diff", "elec_c_emissions_diff"))
 
 plt_tot_cooling = plt_tot_cooling |>
   ggplot(aes(tes_control_id, value, fill = emissions_diff)) + 
@@ -113,12 +138,12 @@ plt_tot_cooling = plt_tot_cooling |>
     # theme(axis.text.x = element_text(angle = 90, hjust=1)) #+
     # coord_flip() # to flip axes
 
-# plt_tot_cooling
-# ggsave(glue("figs/2026-0809/elec_emissions.png"), plot = plt_tot_cooling, width = 14, height=8, units = "in")
+plt_tot_cooling
+# ggsave(glue("../figs/working/2026-0809/elec_emissions.png"), plot = plt_tot_cooling, width = 14, height=8, units = "in")
 ```
 
 ```{r totals_both, include = FALSE, eval = FALSE}
-# filtered_results |> # elec, elec_hr, elec_res, elec_awhp_c, elec_chiller, 
+# need to fix this plot
 baseline = summary |> 
   filter(desc == "No TES") |>
   rename(elec_emissions_base = elec_emissions) |>
@@ -147,7 +172,8 @@ plt_tot_both = plt_tot_both |>
     # theme(axis.text.x = element_text(angle = 90, hjust=1)) #+
     # coord_flip() # to flip axes
 
-# ggsave(glue("figs/2026-0809/elec_emissions.png"), plot = plt_tot_both, width = 14, height=8, units = "in")
+plt_tot_both
+# ggsave(glue("../figs/working/2026-0809/elec_emissions.png"), plot = plt_tot_both, width = 14, height=8, units = "in")
 ```
 
 ```{r equip_sizes, include = FALSE, eval = FALSE}
@@ -187,8 +213,8 @@ plt_sizes = sizes |>
     theme(legend.position = "top", legend.text = element_markdown()) +
     facet_grid(tes_sizing ~ building) 
 
-# plt_sizes
-# ggsave(glue("figs/2026-0728/equip_sizes.png"), plot = plt_sizes, width = 14, height=8, units = "in")
+plt_sizes
+# ggsave(glue("../figs/working/2026-0728/equip_sizes.png"), plot = plt_sizes, width = 14, height=8, units = "in")
 ```
 
 ```{r TES_percent_hrs, include = FALSE, eval = FALSE}
@@ -205,8 +231,8 @@ plt_hist = results_all |>
     # facet_grid(building ~ eq_scen_id)
     ggh4x::facet_nested(building ~ reorder(tes_sizing, eq_scen_id) + reorder(tes_control_desc, eq_scen_id))
 
-# plt_hist
-# ggsave(glue("figs/2026-0809/tes_charge_hist.png"), plot = plt_hist, width = 16, units = "in")
+plt_hist
+# ggsave(glue("../figs/working/2026-0809/tes_charge_hist.png"), plot = plt_hist, width = 16, units = "in")
 ```
 
 ``` {r TES_utilization_hours, include = FALSE, eval = FALSE}
@@ -228,8 +254,8 @@ plt_util_hrs = results_all |>
     theme(legend.position = "top") +
     facet_grid(reorder(tes_sizing, eq_scen_id) ~ building)
 
-# plt_util_hrs
-# ggsave(glue("figs/2026-0809/tes_utilization.png"), plot = plt_util_hrs, width = 14, height=8, units = "in")
+plt_util_hrs
+# ggsave(glue("../figs/working/2026-0809/tes_utilization.png"), plot = plt_util_hrs, width = 14, height=8, units = "in")
 ```
 
 ``` {r TES_utilization_hours_szn, include = FALSE, eval = FALSE}
@@ -257,6 +283,8 @@ plt_util_hrs_szn = results_all |>
     theme(legend.position = "top") +
     # facet_grid(building ~ reorder(desc, eq_scen_id))
     facet_nested(building ~ tes_sizing + reorder(tes_control_desc, eq_scen_id))
+
+plt_util_hrs_szn
 ```
 
 ```{r TES_utilization_season, include = FALSE, eval = FALSE}
@@ -283,8 +311,8 @@ plt_util_szn = results_all |>
     # facet_grid(building ~ reorder(desc, eq_scen_id))
     facet_wrap( ~ building)
 
-# plt_util_szn
-# ggsave(glue("figs/2026-0707/tes_utilization_szn.png"), plot = plt_util_szn, width = 14, height=8, units = "in")
+plt_util_szn
+# ggsave(glue("../figs/working/2026-0707/tes_utilization_szn.png"), plot = plt_util_szn, width = 14, height=8, units = "in")
 ```
 
 ```{r aggregated timeseries, hour, include = FALSE, eval = FALSE}
@@ -308,7 +336,7 @@ plt_hr = function(df, scen, equip_scenarios) {
     return(plt)
 }
 
-# ggsave(glue("figs/2026-0616/hhw_hourly_scen3.png"), plot = plt_hr(results_all, 3, equip_scenarios), width = 15, units = "in")
+# ggsave(glue("../figs/2026-0616/hhw_hourly_scen3.png"), plot = plt_hr(results_all, 3, equip_scenarios), width = 15, units = "in")
 
 # plt_hr_all = plt_hr(results_all, 1, equip_scenarios) + 
 #   plt_hr(results_all, 2, equip_scenarios) +
@@ -317,9 +345,9 @@ plt_hr = function(df, scen, equip_scenarios) {
 #   plt_hr(results_all, 5, equip_scenarios) +
 #   plt_hr(results_all, 6, equip_scenarios) +
 #   plot_layout(ncol = 2)
-# plt_hr(results_all, 4, equip_scenarios)
+plt_hr(results_all, 4, equip_scenarios)
 
-# ggsave(glue("figs/2026-0626/emissions_hhw_hourly_all.png"), plot = plt_hr_all, width = 20, height = 12, units = "in")
+# ggsave(glue("../figs/working/2026-0626/emissions_hhw_hourly_all.png"), plot = plt_hr_all, width = 20, height = 12, units = "in")
 ```
 
 ```{r aggregated timeseries_szn, include = FALSE, eval = FALSE}
@@ -351,8 +379,8 @@ plt_szn = function(df, scen, equip_scenarios) {
 }
 
 s = 4
-# plt_szn(results_all, s, equip_scenarios)
-# ggsave(glue("figs/2026-0625/hhw_hourly_scen{s}.png"), plot = plt_szn(results_all, s, equip_scenarios), width = 10, units = "in")
+plt_szn(results_all, s, equip_scenarios)
+# ggsave(glue("../figs/working/2026-0625/hhw_hourly_scen{s}.png"), plot = plt_szn(results_all, s, equip_scenarios), width = 10, units = "in")
 
 # plt_szn_all = plt_szn(results_all, 1, equip_scenarios) + 
 #   plt_szn(results_all, 2, equip_scenarios) +
@@ -363,7 +391,7 @@ s = 4
 #   plot_layout(ncol = 2)
 # plt_szn_all
 
-# ggsave(glue("figs/2026-0630/hhw_hourly_szn.png"), plot = plt_szn_all, width = 20, height = 12, units = "in")
+# ggsave(glue("../figs/2026-0630/hhw_hourly_szn.png"), plot = plt_szn_all, width = 20, height = 12, units = "in")
 ```
 
 ```{r sample_days_awhp, include = FALSE, eval = FALSE}
@@ -531,7 +559,7 @@ plt_days(dat, "180", plot_dates)
 # for (id in bldgs$bldg_id) {
 #   plot = plt_days(dat, id, plot_dates)
 #   # print(plot)
-#   ggsave(glue("figs/2026-0728/sample_days/{id}.png"), plot = plot, width = 16, height = 12, units = "in")
+#   ggsave(glue("../figs/working/2026-0728/sample_days/{id}.png"), plot = plot, width = 16, height = 12, units = "in")
 # }
 ```
 
@@ -620,247 +648,8 @@ loads_plot = dat |>
 final_plot = oat_plot + emissions_plot + loads_plot + patchwork::plot_layout(ncol = 1, heights = c(1,1,6))
 final_plot
 
-# ggsave(glue("figs/2026-0712/bldg_{bldg}_timeseries.png"), plot = final_plot, width = 12, units = "in")
+# ggsave(glue("../figs/working/2026-0712/bldg_{bldg}_timeseries.png"), plot = final_plot, width = 12, units = "in")
 ```
 
-```{r fig-dataset_peakdays, eval = FALSE, include = FALSE}
-#| fig-cap: "Building HHW peak day profiles"
-#| fig-width: 6
-#| fig-height: 6
-
-sizes = nums |> filter(desc == "with_TES") |> select(building, AWHP_cap_kW, TES_size_kWh)
-design_dates = plot_dates |> filter(season == "Peak Day") |> select(-season,  peak_date = date) |> mutate(building = as.character(building))
-
-dat = plot_df |>
-  left_join(design_dates, by = "building") |>
-  filter(date(datetime) == peak_date) |>
-  left_join(sizes, by = "building") |>
-  mutate(hour = hour(datetime), hhw = hhw/1000, chw = chw/1000)
-
-ann = dat |>
-  group_by(ID) |>
-  summarize(max_hhw = max(hhw), AWHP_cap = max(AWHP_cap_kW)) |>
-  mutate(max_hhw_percent = AWHP_cap/max_hhw, y = AWHP_cap) |>
-  mutate(x = c(6, 6, 6, 3.5, 3.5, 9))
-
-scaler = ann |>
-  select(ID, max_hhw) |>
-  mutate(zero = 0, hour = 12) |>
-  pivot_longer(cols = c(max_hhw, zero), names_to = "plot", values_to = "value")
-
-plot_peaks = dat |>
-  ggplot() +
-    geom_line(aes(hour, hhw, color = "hhw")) +
-    geom_line(aes(hour, AWHP_cap_kW, color = "AWHP_cap_kW"),  linetype = 2) +
-    geom_line(aes(hour, TES_size_kWh, color = "TES_size_kWh"),  linetype = 2) +
-    geom_point(data=scaler, aes(y=value), x = NA) +
-    geom_text(data = ann,
-        aes(x, y, label = str_c(percent(max_hhw_percent, accuracy=1), " of peak"), 
-        # vjust = ifelse(building %in% c(180, 181, 189), 1.4, -0.6),
-        ),
-        size=2.5, hjust=0, vjust = 1.4
-        ) +
-    scale_color_manual(values = c("AWHP_cap_kW" = "red", "hhw" = "red", "TES_size_kWh" = "orange"), labels = c("AWHP_cap_kW" = "AWHP capacity", "hhw" = "HHW", "TES_size_kWh" = "TES capacity (kWh)")) +
-    facet_grid(ID ~ ., scales = "free") +
-    labs(x = "Hour", y = "Load (kW)", color = "") +
-    scale_y_continuous(labels=comma, sec.axis = sec_axis(~ . * 3.412, name = "Load [kBtu/h]", labels=comma)) +
-    theme(legend.position = "top", strip.text.y = element_text(angle = 0),  axis.title.y.right = element_text(angle = 90))
-```
-
-```{r fig-emissions_fixed_hrs, eval = FALSE, include = FALSE}
-#| fig-cap: "Control strategy 2: Fixed On-Peak Discharging"
-#| fig-width: 8
-#| fig-height: 4
-
-id = "181"
-peak_date = plot_dates |> filter(building == id, season == "Peak Day") |> pull(date)
-
-dat = plot_results |> 
-  filter(building == id, eq_scen_id %in% c(1,7)) |>
-  mutate(season = ifelse(date == peak_date, "Peak Day", season),
-        quarter = ifelse(date == peak_date, 0, quarter)) |>
-  filter(date %in% filter(plot_dates, building == id)$date) |>
-  mutate(season_date = str_c(season, " (", date, ")")) |>
-  filter(quarter %in% c(0,1,3))
-
-plot_dates_emissions = dat |>
-  filter(date %in% plot_dates$date) |>
-  summarize(elec_emissions = sum(elec_h_emissions), .by = c(building, eq_scen_id, desc, date, quarter))
-
-plot_dates_baseline_emissions = plot_dates_emissions |>
-  filter(desc == "No TES") |>
-  rename(elec_emissions_base = elec_emissions) |>
-  select(building, date, elec_emissions_base)
-
-plot_dates_emissions = plot_dates_emissions |>
-  filter(desc != "No TES") |>
-  left_join(plot_dates_baseline_emissions, by = c("building", "date")) |>
-  mutate(elec_emissions_diff = 100*(elec_emissions - elec_emissions_base)/elec_emissions_base,
-  building = as.double(building)) |>
-  filter(abs(elec_emissions_diff) > 1e-1) |>
-  inner_join(plot_dates, by = c("building", "date")) |>
-  mutate(x = force_tz(ymd_h(str_c(as.character(date), " 11 PM")), "US/Pacific"), y = 1100) |>
-  mutate(season_date = str_c(season, " (", date, ")"))
-
-# emissions_plot = dat |>
-#   ggplot() +
-#     geom_line(aes(datetime, elec_emissions_rate, color="Emissions Rate"), linetype = 2) +
-#     labs(x = "", y = "[kgC02e/kWh]", color="") + # , subtitle = str_c("Building #", id)
-#     scale_x_datetime(labels = NULL) +
-#     scale_color_manual(values = c("Emissions Rate" = "gray")) +
-#     facet_grid(. ~ reorder(season_date, quarter), scales = "free_x") +
-#     theme(axis.ticks.x = element_blank(),
-#       legend.position=c(0.1, 1.78),
-#       legend.justification="left",
-#       legend.background = element_blank())
-
-hp_on_ctrl = dat |>
-    group_by(desc, eq_scen_id) |>
-    mutate(on = operate_hp_tes, group = cumsum(on != lag(on, default = FALSE))) |>
-    filter(on == TRUE) |>
-    group_by(desc, eq_scen_id, season_date, quarter, group) |>
-    summarize(xmin = min(datetime), xmax = max(datetime)+hours(1))
-
-hp_on_oat = dat |>
-  group_by(desc, eq_scen_id) |>
-  mutate(on = (!(operate_hp_tes) & hp_tes != 0), group = cumsum(on != lag(on, default = FALSE))) |>
-  filter(on == TRUE) |>
-  group_by(desc, eq_scen_id, season_date, quarter, group) |>
-  summarize(xmin = min(datetime), xmax = max(datetime)+hours(1))
-
-loads_plot = dat |>
-  pivot_longer(
-    cols = c(TES_charge, awhp_hhw), # TES_load),
-    names_to = "equipment",
-    values_to = "load") |>
-  mutate(load = load/1000) |>
-  mutate(equipment = case_when(
-    equipment == "awhp_hhw" ~ "AWHP",
-    equipment == "TES_charge" ~ "TES charge"
-    )) |>
-  ggplot() +
-    geom_line(aes(datetime, load, color = equipment)) +
-    geom_line(aes(datetime, awhp_cap_h_total/1000, color="awhp_cap_h_total"), linetype=2) +
-    geom_text(data = plot_dates_emissions,
-        aes(x, y, label = str_c(percent(elec_emissions_diff/100, accuracy=0.1, style_positive = "plus"), " emissions\nfrom no TES")), vjust = 2, hjust = 1, size=3) +
-    geom_rect(data = hp_on_ctrl, aes(xmin=xmin, xmax=xmax, ymin=0, ymax=Inf, fill="HP Priority (Calc. Hrs)"), alpha=0.1) +
-    geom_rect(data = hp_on_oat, aes(xmin=xmin, xmax=xmax, ymin=0, ymax=Inf, fill="HP Enabled (OAT Min.)"), alpha=0.1) +
-    labs(x = "Hour", y = "Energy use [kW]", color = NULL, fill = NULL) +
-    scale_color_manual(values = c("TES charge" = "orange", "AWHP" = "red", "awhp_cap_h_total" = "red"), labels = c("awhp_cap_h_total" = "Max AWHP capacity")) +
-    scale_fill_manual(values = c("HP Priority (Calc. Hrs)" = "green", "HP Enabled (OAT Min.)" = "blue")) +
-    scale_x_datetime(date_labels = "%H") +
-    facet_grid(reorder(desc, eq_scen_id) ~ reorder(season_date, quarter), scales = "free_x") +
-    guides(color = guide_legend(direction = "horizontal"), fill = guide_legend(direction = "horizontal")) +
-    theme(legend.position= "top",
-        legend.justification="right",
-        legend.background = element_blank(),
-        strip.text.x = element_blank(),
-        axis.title.y.right = element_text(angle = 90)) +
-    scale_y_continuous(labels=comma, sec.axis = sec_axis(~ . * 3.412, name = "Energy use [kBtu/h]", labels=comma))
-
-# legend = get_legend(loads_plot)
-# legend_wrapped = wrap_elements(full = legend)
-# loads_plot = loads_plot + theme(legend.position = "none")
-
-# final_plot = legend_wrapped + emissions_plot + plot_spacer() + loads_plot +
-#     plot_layout(ncol=1, heights = c(0.1, 1, -0.6, 6))
-# final_plot
-loads_plot
-```
-
-```{r fig-awhp_tot_emissions_old, include = FALSE, eval = FALSE}
-#| fig-cap: "Heating electricity use emissions compared to no-TES scenario"
-#| fig-width: 10
-#| fig-height: 4
-ann_awhp = select(AWHP_sizes, ID, red = `AWHP capacity reduction`) |>
-  mutate(red = as.numeric(str_extract(red, ".*(?=%)"))) |>
-  mutate(red = round(red)) |>
-  mutate(red = str_c(as.character(red), "%")) |>
-  mutate(tag = str_c("Building ", ID), fac_label = str_c(tag, "\nAWHP size reduction: ", red))
-
-plt_tot = summary |>
-  mutate(tag = str_c("Building ", ID)) |>
-  left_join(ann_awhp, by = "ID") |>
-  filter(desc != "No TES", tes_sizing != "2x Partial") |>
-  ggplot(aes(tes_control_id, elec_h_emissions_diff)) + 
-    geom_col(fill = "orange") +
-    geom_text(
-      aes(label = percent(elec_h_emissions_diff/100, accuracy = ifelse(abs(elec_h_emissions_diff)<1, 0.1, 1), style_positive = "plus"), vjust = ifelse(elec_h_emissions_diff>0, -0.8, 1.8)),
-      ) +
-    geom_point(data = tes_control_scenarios, aes(x = Inf, y = Inf, shape = tes_legend), alpha=0, inherit.aes=FALSE) +
-    labs(y="Percentage difference", x = "Control strategy", shape="", fill="") +
-    theme(
-        legend.position="top",
-        # legend.justification="right",
-        legend.background = element_blank()) +
-    scale_x_continuous(breaks = tes_control_scenarios$tes_control_id) +
-    scale_y_continuous(limits=c(-20,0), breaks = seq(-20, 0, 10), labels = percent(seq(-0.2,0,0.1))) +
-    facet_grid(. ~ fac_label)
-    # coord_cartesian(ylim = c(0, -20), clip = "off")
-
-# plt_tot
-```
-
-```{r fig-awhp_tot_energy, include = FALSE, eval = FALSE}
-#| fig-cap: "Heating electricity usage compared to no-TES scenario"
-#| fig-width: 8
-#| fig-height: 4
-ann_awhp = select(AWHP_sizes, ID, red = `AWHP capacity reduction`) |>
-  mutate(red = as.numeric(str_extract(red, ".*(?=%)"))) |>
-  mutate(red = round(red)) |>
-  mutate(red = str_c(as.character(red), "%")) |>
-  mutate(tag = str_c("Building ", ID), fac_label = str_c(tag, "\nMax AWHP size reduction: ", red))
-
-summary |>
-  left_join(ann_awhp, by = "ID") |>
-  filter(!(desc %in% c("No TES", "BaselineGas"))) |>
-  mutate(sizing_plot = case_when(
-    tes_sizing == "Partial" ~ 1,
-    tes_sizing == "2x Partial" ~ 2,
-    tes_sizing == "3x Partial" ~ 3,
-    tes_sizing == "4x Partial" ~ 4,
-    tes_sizing == "5x Partial" ~ 5,
-  )) |>
-  ggplot(aes(sizing_plot, elec_awhp_h_diff, color = tes_legend)) +
-    geom_line() +
-    geom_point(shape = 18) +
-    labs(y="Percent difference in annual heating energy usage", x = "Tank sizing factor", color = "") +
-    scale_y_continuous(limits=c(-10,5), breaks = seq(-10, 5, 5), labels = percent(seq(-0.1,0.05,0.05))) +
-    scale_x_continuous(labels = c("1x", "2x", "3x", "4x", "5x")) +
-    theme(legend.position="top") +
-    scale_color_manual(values = c("#b0750c", "#3b7ea1", "#D9661F")) +
-    # facet_grid(fac_label ~ .)
-    facet_wrap(~ fac_label) 
-```
-
-```{r fig-sizing_disc, eval = FALSE, include = FALSE}
-#| fig-cap: "(a) HHW peak day profiles (b) Aggregated mean building loads by season"
-#| fig-width: 12
-#| fig-height: 6
-
-final_plt = plot_peaks + plot_spacer() + plot_means +
-    plot_layout(nrow=1, widths = c(4, 0.05, 4))
-final_plt 
-```
-
-```{r tbl-2x, eval = FALSE, include = FALSE}
-#| tbl-cap: "Annual heating emissions savings from no-TES scenario, strategy 3"
-
-dat = summary |> filter(tes_control_id == 3) |> 
-  select(ID, tes_sizing, elec_h_emissions_diff)
-
-std = dat |> filter(tes_sizing == "Partial") |> select(ID, std_diff = elec_h_emissions_diff)
-x2 = dat |> filter(tes_sizing == "2x Partial") |>
-  left_join(std, by = "ID") |>
-  left_join(select(ann, ID, max_hhw_percent), by = "ID") |>
-  mutate(x2_increase = -100*(- elec_h_emissions_diff + std_diff)/std_diff) |>
-  mutate(elec_h_emissions_diff = -elec_h_emissions_diff/100, std_diff = -std_diff/100) |>
-  mutate(max_hhw_percent = percent(max_hhw_percent, accuracy=1),
-  std_diff = percent(std_diff, accuracy=1),
-  elec_h_emissions_diff = percent(elec_h_emissions_diff, accuracy=1)) |>
-  select("Building ID" = ID, "AWHP size (% of peak load)" = max_hhw_percent, "Emissions savings (original tank sizing)" = std_diff, "Emissions savings (2x tank sizing)" = elec_h_emissions_diff)
-
-flextable(x2)
-```
 
 x

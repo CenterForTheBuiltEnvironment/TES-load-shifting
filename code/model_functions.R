@@ -2,9 +2,9 @@ library(tidyverse)
 library(magrittr)
 library(lubridate)
 
-source("code/import_data.R")
-source("code/basic_functions.R")
-source("code/TES_functions.R")
+source("../code/import_data.R")
+source("../code/basic_functions.R")
+source("../code/TES_functions.R")
 
 loads_to_site_energy = function(equip_scenario, df, detail=T){
   # TLDR: converts the measured loads to site energy consumption 

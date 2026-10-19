@@ -3,13 +3,17 @@ library(tidyverse)
 library(ggplot2)
 ```
 
+```{r scripts, include = FALSE}
+source("../code/model_run.R")
+```
+
 ```{r end_charge, include = FALSE}
 # buildings where end charge is less than start charge
-# results_all |>
-#   group_by(building, desc) |>
-#   filter(!(desc %in% c("BaselineGas", "No TES"))) |>
-#   filter(TES_charge[n()] < TES_charge[1]) |>
-#   distinct(building, desc)
+results_all |>
+  group_by(building, desc) |>
+  filter(!(desc %in% c("BaselineGas", "No TES"))) |>
+  filter(TES_charge[n()] < TES_charge[1]) |>
+  distinct(building, desc)
 ```
 
 ```{r check_design_oats, include = FALSE, eval = FALSE}

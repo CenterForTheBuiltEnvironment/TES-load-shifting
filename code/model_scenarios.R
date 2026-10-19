@@ -1,6 +1,6 @@
 library(tidyverse)
 
-source("code/model_functions.R")
+source("../code/model_functions.R")
 
 # higher level function
 # for assessing different equipment and emissions scenarios (combined, full factorial)
